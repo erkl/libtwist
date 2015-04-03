@@ -91,10 +91,8 @@ ssize_t twine_write(struct twine_conn * conn, const uint8_t * buf, size_t len);
 int twine_flush(struct twine_conn * conn);
 
 
-/* Watch for state changes on a connection. */
-void twine_monitor(struct twine_conn * conn,
-                   void (*callback)(struct twine_conn * conn, int state, void * priv),
-                   void * priv);
+/* Get the connection's current state. */
+int twine_state(struct twine_conn * conn);
 
 
 /* Initiate the graceful shutdown of a connection. */
