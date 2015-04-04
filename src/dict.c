@@ -105,7 +105,7 @@ struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie)
     conn = table->entries[index];
 
     while (conn != NULL && conn->local_cookie != cookie)
-        conn = conn->next;
+        conn = conn->chain;
 
     return conn;
 }
@@ -138,7 +138,7 @@ int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn) {
 
     /* Insert the connection at the head of the bucket. */
     head = table->entries[index];
-    conn->next = head;
+    conn->chain = head;
     table->entries[index] = conn;
 
     /* Update the entry count. */
@@ -172,15 +172,15 @@ int twine__dict_remove(struct twine__dict * dict, uint64_t cookie) {
     while ((conn = *prev) != NULL) {
         /* If we find a match, unlink it and stop. */
         if (conn->local_cookie == cookie) {
-            *prev = conn->next;
-            conn->next = NULL;
+            *prev = conn->chain;
+            conn->chain = NULL;
             dict->count--;
             break;
         }
 
         /* We can only unlink the connection if we keep track of the
          * previous pointer. */
-        prev = &conn->next;
+        prev = &conn->chain;
     }
 
     return TWINE_OK;
@@ -244,13 +244,13 @@ static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
 
     /* Move all entries in the original chain. */
     while (conn != NULL) {
-        next = conn->next;
+        next = conn->chain;
 
         /* Move the connection struct to its new home bucket. */
         key = (uint32_t) siphash(dict->seed, conn->local_cookie);
         index = key & dict->tables[1].mask;
 
-        conn->next = dict->tables[1].entries[index];
+        conn->chain = dict->tables[1].entries[index];
         dict->tables[1].entries[index] = conn;
 
         /* Move on to the next chained entry. */

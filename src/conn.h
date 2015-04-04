@@ -43,8 +43,8 @@ struct twine_conn {
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
-    /* Intrusive list pointer. */
-    struct twine_conn * next;
+    /* Intrusive pointer for hash table chaining. */
+    struct twine_conn * chain;
 };
 
 
