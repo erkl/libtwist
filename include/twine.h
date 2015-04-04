@@ -37,6 +37,14 @@
 #include <sys/types.h>
 
 
+/* Error codes. */
+#define TWINE_OK        ( 0)
+#define TWINE_EINVAL    (-1)
+#define TWINE_ENOMEM    (-2)
+#define TWINE_EENTROPY  (-3)
+#define TWINE_EAGAIN    (-4)
+
+
 /* Opaque socket and connection handles. */
 struct twine_sock;
 struct twine_conn;
