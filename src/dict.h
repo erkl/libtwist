@@ -93,7 +93,7 @@ struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie)
 int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn);
 
 /* Remove a connection entry from the dict. */
-int twine__dict_remove(struct twine__dict * dict, uint64_t cookie);
+int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn);
 
 
 #endif

@@ -149,11 +149,15 @@ int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn) {
 
 
 /* Remove a connection entry from the dict. */
-int twine__dict_remove(struct twine__dict * dict, uint64_t cookie) {
+int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn) {
     struct twine__dict_table * table;
-    struct twine_conn * conn, ** prev;
+    struct twine_conn ** prev;
+    uint64_t cookie;
     uint32_t index;
     int ret;
+
+    /* Extract the cookie. */
+    cookie = conn->local_cookie;
 
     /* If we're resizing the underlying hash table, move some buckets.
      * Otherwise, see if the underlying hash table needs resizing. */
