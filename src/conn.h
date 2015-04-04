@@ -45,6 +45,10 @@ struct twine_conn {
 
     /* Intrusive pointer for hash table chaining. */
     struct twine_conn * chain;
+
+    /* Intrusive list pointers. */
+    struct twine_conn * prev;
+    struct twine_conn * next;
 };
 
 
