@@ -33,7 +33,7 @@
 
 /* Minimum (default) and maximum hash table sizes. The maximum size may seem
  * arbitrary, but it's the highest we can go while being sure multiplication
- * by 8 (size of 64-bit pointers) won't overflow. */
+ * by 8 (size of 64-bit pointers) won't overflow uint32_t. */
 #define MIN_TABLE_SIZE  (1 << 6)
 #define MAX_TABLE_SIZE  (1 << 28)
 
