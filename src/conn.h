@@ -43,12 +43,15 @@ struct twine_conn {
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
-    /* Intrusive pointer for hash table chaining. */
-    struct twine_conn * chain;
+    /* Indicates when the next time-based event is scheduled to occur. */
+    int64_t next_tick;
 
     /* Intrusive list pointers. */
     struct twine_conn * prev;
     struct twine_conn * next;
+
+    /* Intrusive pointer for hash table chaining. */
+    struct twine_conn * chain;
 };
 
 
