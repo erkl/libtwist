@@ -28,6 +28,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
+#include <nectar.h>
 #include "dict.h"
 
 
@@ -45,12 +46,10 @@ static void migrate_buckets(struct twine__dict * dict, int num);
 static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
                               struct twine__dict_table ** table);
 
-static uint64_t siphash(uint64_t seed[2], uint64_t cookie);
-
 
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
-int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint64_t seed[2]) {
+int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_t seed[16]) {
     struct twine_conn ** entries;
     int i;
 
@@ -70,10 +69,11 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint64
     };
 
     dict->split = 0;
-    dict->seed[0] = seed[0];
-    dict->seed[1] = seed[1];
     dict->count = 0;
     dict->conf = conf;
+
+    for (i = 0; i < 16; i++)
+        dict->seed[i] = seed[i];
 
     return TWINE_OK;
 }
@@ -251,7 +251,7 @@ static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
         next = conn->chain;
 
         /* Move the connection struct to its new home bucket. */
-        key = (uint32_t) siphash(dict->seed, conn->local_cookie);
+        key = (uint32_t) nectar_siphash(dict->seed, (const uint8_t *) conn->local_cookie, 8);
         index = key & dict->tables[1].mask;
 
         conn->chain = dict->tables[1].entries[index];
@@ -294,7 +294,7 @@ static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
     uint32_t key, index;
 
     /* Find the relevant bucket in the main hash table. */
-    key = (uint32_t) siphash(dict->seed, cookie);
+    key = (uint32_t) nectar_siphash(dict->seed, (const uint8_t *) cookie, 8);
     index = key & dict->tables[0].mask;
 
     /* If we're in the process of moving to a new hash table, and our bucket
@@ -307,50 +307,4 @@ static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
     }
 
     return index;
-}
-
-
-/* SipHash helper macros. */
-#define ROTL64(x, n)                                                           \
-    ((uint64_t) (((x) << (n)) | ((x) >> (64 - (n)))))
-
-#define SIPHASH_ROUND(v0, v1, v2, v3)                                          \
-    do {                                                                       \
-        v0 += v1;  v1 = ROTL64(v1, 13);  v1 ^= v0;  v0 = ROTL64(v0, 32);       \
-        v2 += v3;  v3 = ROTL64(v3, 16);  v3 ^= v2;                             \
-        v0 += v3;  v3 = ROTL64(v3, 21);  v3 ^= v0;                             \
-        v2 += v1;  v1 = ROTL64(v1, 17);  v1 ^= v2;  v2 = ROTL64(v2, 32);       \
-    } while (0)
-
-
-/* Unrolled SipHash-2-4 implementation operating on only 64 bits of input. */
-static uint64_t siphash(uint64_t seed[2], uint64_t cookie) {
-    uint64_t v0, v1, v2, v3;
-
-    /* Initialize state. */
-    v0 = 0x736f6d6570736575ULL ^ seed[0];
-    v1 = 0x646f72616e646f6dULL ^ seed[1];
-    v2 = 0x6c7967656e657261ULL ^ seed[0];
-    v3 = 0x7465646279746573ULL ^ seed[1];
-
-    /* Mix in the single 8-byte block of input. */
-    v3 ^= cookie;
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    v0 ^= cookie;
-
-    /* Mix in the input length. */
-    v3 ^= (uint64_t) 8 << 56;
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    v0 ^= (uint64_t) 8 << 56;
-
-    /* Finalize the hash. */
-    v2 ^= 0xff;
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    SIPHASH_ROUND(v0, v1, v2, v3);
-    SIPHASH_ROUND(v0, v1, v2, v3);
-
-    return (v0 ^ v1 ^ v2 ^ v3);
 }

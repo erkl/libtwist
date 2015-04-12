@@ -61,7 +61,7 @@ struct twine__dict {
     uint32_t split;
 
     /* Seed material for the key hashing function. */
-    uint64_t seed[2];
+    uint8_t seed[16];
 
     /* Number of entries currently stored in the dict. */
     uint64_t count;
@@ -74,7 +74,7 @@ struct twine__dict {
 
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
-int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint64_t seed[2]);
+int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_t seed[16]);
 
 /* Free the dict's internal hash table(s). */
 void twine__dict_destroy(struct twine__dict * dict);
