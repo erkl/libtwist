@@ -31,7 +31,7 @@
 #ifndef LIBTWINE_CONN_H
 #define LIBTWINE_CONN_H
 
-#include "twine.h"
+#include "include/twine.h"
 
 
 /* Connection handle, opaque to the user. */

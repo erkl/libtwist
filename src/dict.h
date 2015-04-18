@@ -31,8 +31,8 @@
 #ifndef LIBTWINE_DICT_H
 #define LIBTWINE_DICT_H
 
-#include "twine.h"
-#include "conn.h"
+#include "include/twine.h"
+#include "src/conn.h"
 
 
 /* Underlying hash table used by `twine__dict`. */

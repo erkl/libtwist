@@ -1,6 +1,6 @@
 CC      = clang
 AR      = ar
-CFLAGS  = -O2 -Wall -Werror -std=c99 -pedantic -I./include
+CFLAGS  = -O2 -Wall -Werror -std=c99 -pedantic -I.
 
 SOURCES = $(shell find src -type f -name "*.c")
 OBJECTS = $(SOURCES:src/%.c=build/%.o)

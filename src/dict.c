@@ -29,7 +29,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #include <nectar.h>
-#include "dict.h"
+
+#include "src/dict.h"
 
 
 /* Minimum (default) and maximum hash table sizes. The maximum size may seem

@@ -31,7 +31,7 @@
 #ifndef LIBTWINE_PACKET_H
 #define LIBTWINE_PACKET_H
 
-#include "twine.h"
+#include "include/twine.h"
 
 
 /* Minimum and maximum packet sizes. The maximum size may seem arbitrary, but

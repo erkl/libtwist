@@ -32,7 +32,8 @@
 #define LIBTWINE_PRNG_H
 
 #include <nectar.h>
-#include "twine.h"
+
+#include "include/twine.h"
 
 
 /* Generates non-deterministic bits using ChaCha20 keystreams. */

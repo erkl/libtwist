@@ -31,9 +31,9 @@
 #ifndef LIBTWINE_SOCK_H
 #define LIBTWINE_SOCK_H
 
-#include "twine.h"
-#include "dict.h"
-#include "prng.h"
+#include "include/twine.h"
+#include "src/dict.h"
+#include "src/prng.h"
 
 
 /* Socket handle, opaque to the user. */
