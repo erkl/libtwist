@@ -65,49 +65,46 @@ struct twine_conf {
 };
 
 
-/* Allocate and initialize a socket. */
-int twine_init(struct twine_sock ** sock, struct twine_conf * conf);
+/* TODO: Documentation. */
+int twine_create(struct twine_sock ** sock, struct twine_conf * conf);
 
-/* Free all resources associated with a socket. */
-int twine_shutdown(struct twine_sock ** sock);
-
-
-/* Signal time passing to the socket. */
+/* TODO: Documentation. */
 int64_t twine_tick(struct twine_sock * sock, int64_t now);
 
-/* Feed a received UDP packet to the socket. */
+/* TODO: Documentation. */
 int64_t twine_recv(struct twine_sock * sock,
                    const struct sockaddr * addr, socklen_t addrlen,
                    const uint8_t * buf, size_t len, int64_t now);
 
+/* TODO: Documentation. */
+int twine_destroy(struct twine_sock ** sock);
 
-/* Establish a connection to a remote host. */
+
+/* TODO: Documentation. */
 int twine_dial(struct twine_sock * sock, struct twine_conn ** conn,
                const struct sockaddr * addr, socklen_t addrlen, int64_t timeout);
 
-/* Accept an incoming connection request. */
+/* TODO: Documentation. */
 int twine_accept(struct twine_sock * sock, struct twine_conn ** conn, int64_t timeout);
 
 
-/* Read data from the connection. */
-ssize_t twine_read(struct twine_conn * conn, uint8_t * buf, size_t len);
-
-/* Write data to the connection. */
-ssize_t twine_write(struct twine_conn * conn, const uint8_t * buf, size_t len);
-
-/* Flush any data still in the write buffer. */
-int twine_flush(struct twine_conn * conn);
-
-
-/* Get the connection's current state. */
+/* TODO: Documentation. */
 int twine_state(struct twine_conn * conn);
 
+/* TODO: Documentation. */
+ssize_t twine_read(struct twine_conn * conn, uint8_t * buf, size_t len);
 
-/* Initiate the graceful shutdown of a connection. */
+/* TODO: Documentation. */
+ssize_t twine_write(struct twine_conn * conn, const uint8_t * buf, size_t len);
+
+/* TODO: Documentation. */
+int twine_flush(struct twine_conn * conn);
+
+/* TODO: Documentation. */
 int twine_close(struct twine_conn * conn);
 
-/* Destroy a connection, freeing all resources associated with it. */
-int twine_destroy(struct twine_conn ** conn);
+/* TODO: Documentation. */
+int twine_terminate(struct twine_conn ** conn);
 
 
 #endif
