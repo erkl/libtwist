@@ -66,7 +66,7 @@ struct twine_conf {
 
 
 /* TODO: Documentation. */
-int twine_create(struct twine_sock ** sock, struct twine_conf * conf);
+int twine_create(struct twine_sock ** sockptr, struct twine_conf * conf);
 
 /* TODO: Documentation. */
 int64_t twine_tick(struct twine_sock * sock, int64_t now);
@@ -77,15 +77,15 @@ int64_t twine_recv(struct twine_sock * sock,
                    const uint8_t * buf, size_t len, int64_t now);
 
 /* TODO: Documentation. */
-int twine_destroy(struct twine_sock ** sock);
+int twine_destroy(struct twine_sock ** sockptr);
 
 
 /* TODO: Documentation. */
-int twine_dial(struct twine_sock * sock, struct twine_conn ** conn,
+int twine_dial(struct twine_sock * sock, struct twine_conn ** connptr,
                const struct sockaddr * addr, socklen_t addrlen, int64_t timeout);
 
 /* TODO: Documentation. */
-int twine_accept(struct twine_sock * sock, struct twine_conn ** conn, int64_t timeout);
+int twine_accept(struct twine_sock * sock, struct twine_conn ** connptr, int64_t timeout);
 
 
 /* TODO: Documentation. */
@@ -104,7 +104,7 @@ int twine_flush(struct twine_conn * conn);
 int twine_close(struct twine_conn * conn);
 
 /* TODO: Documentation. */
-int twine_drop(struct twine_conn ** conn);
+int twine_drop(struct twine_conn ** connptr);
 
 
 #endif
