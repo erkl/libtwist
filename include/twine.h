@@ -104,7 +104,7 @@ int twine_flush(struct twine_conn * conn);
 int twine_close(struct twine_conn * conn);
 
 /* TODO: Documentation. */
-int twine_terminate(struct twine_conn ** conn);
+int twine_drop(struct twine_conn ** conn);
 
 
 #endif
