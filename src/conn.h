@@ -32,6 +32,7 @@
 #define LIBTWINE_CONN_H
 
 #include "include/twine.h"
+#include "src/buffer.h"
 
 
 /* Connection handle, opaque to the user. */
@@ -39,12 +40,16 @@ struct twine_conn {
     /* Owning socket. */
     struct twine_sock * sock;
 
+    /* Current state (one of the TWINE_XXX state constants). */
+    int state;
+
     /* Local and remote connection cookies. */
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
-    /* Indicates when the next time-based event is scheduled to occur. */
-    int64_t next_tick;
+    /* Buffers for outgoing and incoming data. */
+    struct twine__buffer wrbuf;
+    struct twine__buffer rdbuf;
 
     /* Intrusive list pointers. */
     struct twine_conn * prev;
