@@ -45,6 +45,13 @@
 #define TWINE_EAGAIN    (-4)
 
 
+/* Connection states. */
+#define TWINE_CLOSED              (0)
+#define TWINE_HANDSHAKE_SENT      (1)
+#define TWINE_HANDSHAKE_RECEIVED  (2)
+#define TWINE_ESTABLISHED         (3)
+
+
 /* Opaque socket and connection handles. */
 struct twine_sock;
 struct twine_conn;
