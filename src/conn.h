@@ -33,6 +33,7 @@
 
 #include "include/twine.h"
 #include "src/buffer.h"
+#include "src/packet.h"
 
 
 /* Connection handle, opaque to the user. */
@@ -58,6 +59,21 @@ struct twine_conn {
     /* Intrusive pointer for hash table chaining. */
     struct twine_conn * chain;
 };
+
+
+/* Allocate and initialize a connection struct. */
+int64_t twine__conn_create(struct twine_conn ** connptr, struct twine_sock * sock,
+                           uint64_t local_cookie, uint64_t remote_cookie);
+
+/* Free all memory owned by the connection struct. */
+void twine__conn_destroy(struct twine_conn ** connptr);
+
+
+/* Propagate a time event to the connection's state machine. */
+int64_t twine__conn_tick(struct twine_conn * conn, int64_t now);
+
+/* Feed a received packet to the connection's state machine. */
+int64_t twine__conn_recv(struct twine_conn * conn, struct twine__packet * packet, int64_t now);
 
 
 #endif
