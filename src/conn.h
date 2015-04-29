@@ -38,23 +38,19 @@
 
 /* Connection handle, opaque to the user. */
 struct twine_conn {
+    /* Connection state. */
+    int state;
+
     /* Owning socket. */
     struct twine_sock * sock;
-
-    /* Current state (one of the TWINE_XXX state constants). */
-    int state;
 
     /* Local and remote connection cookies. */
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
     /* Buffers for outgoing and incoming data. */
-    struct twine__buffer wrbuf;
-    struct twine__buffer rdbuf;
-
-    /* Intrusive list pointers. */
-    struct twine_conn * prev;
-    struct twine_conn * next;
+    struct twine__buffer write_buffer;
+    struct twine__buffer read_buffer;
 
     /* Intrusive pointer for hash table chaining. */
     struct twine_conn * chain;
