@@ -48,12 +48,15 @@ struct twine_conn {
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
-    /* Buffers for outgoing and incoming data. */
-    struct twine__buffer write_buffer;
-    struct twine__buffer read_buffer;
+    /* When is the next time-based event scheduled to occur? */
+    int64_t next_tick;
 
     /* Intrusive pointer for hash table chaining. */
     struct twine_conn * chain;
+
+    /* Buffers for outgoing and incoming data. */
+    struct twine__buffer write_buffer;
+    struct twine__buffer read_buffer;
 };
 
 
