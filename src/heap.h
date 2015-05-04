@@ -28,54 +28,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-#ifndef LIBTWINE_CONN_H
-#define LIBTWINE_CONN_H
-
-#include "include/twine.h"
-#include "src/buffer.h"
-#include "src/packet.h"
+#ifndef LIBTWINE_HEAP_H
+#define LIBTWINE_HEAP_H
 
 
-/* Connection handle, opaque to the user. */
-struct twine_conn {
-    /* Connection state. */
-    int state;
+/* This is a simple min-heap for storing connections ordered by when their
+ * next time-based event is scheduled to occur. */
+struct twine__heap {
+    /* Underlying storage array. */
+    struct twine_conn ** entries;
 
-    /* Owning socket. */
-    struct twine_sock * sock;
+    /* Number of connections currently stored in the heap. */
+    uint32_t count;
 
-    /* Local and remote connection cookies. */
-    uint64_t local_cookie;
-    uint64_t remote_cookie;
+    /* The underlying storage array's maximum capacity. */
+    uint32_t size;
 
-    /* When is the next time-based event scheduled to occur? */
-    int64_t next_tick;
-
-    /* Current position in the socket's min-heap. */
-    uint32_t heap_index;
-
-    /* Intrusive pointer for hash table chaining. */
-    struct twine_conn * chain;
-
-    /* Buffers for outgoing and incoming data. */
-    struct twine__buffer write_buffer;
-    struct twine__buffer read_buffer;
+    /* Socket configuration. */
+    struct twine_conf * conf;
 };
 
 
-/* Allocate and initialize a connection struct. */
-int64_t twine__conn_create(struct twine_conn ** connptr, struct twine_sock * sock,
-                           uint64_t local_cookie, uint64_t remote_cookie);
+/* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
+ * allocation failed, otherwise TWINE_OK. */
+int twine__heap_init(struct twine__heap * heap, struct twine_conf * conf);
 
-/* Free all memory owned by the connection struct. */
-void twine__conn_destroy(struct twine_conn ** connptr);
+/* Free the heap's underlying storage. */
+void twine__heap_destroy(struct twine__heap * heap);
 
 
-/* Propagate a time event to the connection's state machine. */
-int64_t twine__conn_tick(struct twine_conn * conn, int64_t now);
+/* Get the heap's top-most connection, or NULL if the heap is empty. */
+struct twine_conn * twine__heap_peek(struct twine__heap * heap);
 
-/* Feed a received packet to the connection's state machine. */
-int64_t twine__conn_recv(struct twine_conn * conn, struct twine__packet * packet, int64_t now);
+/* Push a new connection onto the heap. */
+int twine__heap_add(struct twine__heap * heap, struct twine_conn * conn);
+
+/* Remove a connection from the heap. */
+int twine__heap_remove(struct twine__heap * heap, struct twine_conn * conn);
+
+
+/* Re-establish heap ordering after a particular connection's `next_tick`
+ * value has changed. */
+void twine__heap_fix(struct twine__heap * heap, struct twine_conn * conn);
 
 
 #endif
