@@ -32,6 +32,7 @@
 #define LIBTWINE_PACKET_H
 
 #include "include/twine.h"
+#include "src/addr.h"
 
 
 /* Minimum and maximum packet sizes. The maximum size may seem arbitrary, but
@@ -50,8 +51,7 @@ struct twine__packet {
     size_t len;
 
     /* Remote address. */
-    struct sockaddr addr;
-    socklen_t addrlen;
+    struct twine__addr remote;
 
     /* Intrusive list pointers. */
     struct twine__packet * prev;
