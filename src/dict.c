@@ -55,7 +55,7 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_
     int i;
 
     /* Allocate the initial array of hash buckets. */
-    entries = conf->malloc(MIN_TABLE_SIZE * sizeof(*entries));
+    entries = conf->malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
@@ -73,6 +73,7 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_
     dict->count = 0;
     dict->conf = conf;
 
+    /* Copy the seed. */
     for (i = 0; i < 16; i++)
         dict->seed[i] = seed[i];
 
@@ -208,13 +209,13 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
      * buckets, or if at least 75% of the buckets are empty. */
     if (delta > 0 && size < MAX_TABLE_SIZE && count >= (uint64_t) size)
         size <<= 1;
-    else if (delta < 0 && size > MIN_TABLE_SIZE && count <= (uint64_t) (size/4))
+    else if (delta < 0 && size > MIN_TABLE_SIZE && count <= (uint64_t) (size / 4))
         size >>= 1;
     else
         return TWINE_OK;
 
     /* Allocate the underlying storage for our new hash table. */
-    entries = dict->conf->malloc(size * sizeof(*entries));
+    entries = dict->conf->malloc(size * sizeof(struct twine__conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
