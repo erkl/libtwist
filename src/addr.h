@@ -33,15 +33,14 @@
 
 
 /* This struct represents a network address. It basically functions as a much
- * smaller `struct sockaddr_storage`, with a baked in socklen_t. */
+ * smaller `struct sockaddr_storage`, with a baked-in socklen_t. */
 struct twine__addr {
-    /* Using a 64-bit integer is way overkill as `len` will never be more
-     * than 32, but it guarantees that the struct (and therefore the `storage`
-     * array) will be aligned to an 8-byte boundary. */
-    uint64_t len;
+    /* 30 bytes of 8-byte aligned storage. */
+    uint64_t storage;
+    uint8_t pad[22];
 
-    /* Reserved storage. */
-    uint8_t storage[32];
+    /* Address size. */
+    uint16_t len;
 };
 
 
