@@ -32,6 +32,10 @@
 #define LIBTWINE_ADDR_H
 
 
+/* Maximum number of address bytes that will fit in a `twine__addr`. */
+#define MAX_ADDR_LEN  30
+
+
 /* This struct represents a network address. It basically functions as a much
  * smaller `struct sockaddr_storage`, with a baked-in socklen_t. */
 struct twine__addr {
