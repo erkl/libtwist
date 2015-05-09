@@ -28,28 +28,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
-#ifndef LIBTWINE_ADDR_H
-#define LIBTWINE_ADDR_H
+#include <string.h>
 
-
-/* This struct represents a network address. It basically functions as a much
- * smaller `struct sockaddr_storage`, with a baked-in socklen_t. */
-struct twine__addr {
-    /* 30 bytes of 8-byte aligned storage. */
-    uint64_t storage;
-    uint8_t pad[22];
-
-    /* Address size. */
-    uint16_t len;
-};
+#include "include/twine.h"
+#include "src/addr.h"
 
 
 /* Construct an address from a plain `sockaddr` struct. */
 void twine__addr_load(struct twine__addr * addr,
-                      struct sockaddr * sockaddr, socklen_t socklen);
+                      struct sockaddr * sockaddr, socklen_t socklen) {
+    memcpy(&addr->storage, sockaddr, (size_t) socklen);
+    addr->len = (uint16_t) socklen;
+}
+
 
 /* Copy the value of the address `from` into `addr`. */
-void twine__addr_copy(struct twine__addr * addr, struct twine__addr * from);
-
-
-#endif
+void twine__addr_copy(struct twine__addr * addr, struct twine__addr * from) {
+    memcpy(addr, from, sizeof(struct twine__addr));
+}
