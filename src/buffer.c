@@ -30,6 +30,7 @@
 
 #include <string.h>
 
+#include "include/twine.h"
 #include "src/buffer.h"
 
 
