@@ -21,6 +21,7 @@
 /* Construct an address from a plain `sockaddr` struct. */
 void twine__addr_load(struct twine__addr * addr,
                       struct sockaddr * sockaddr, socklen_t socklen) {
+    memset(addr, 0, sizeof(struct twine__addr));
     memcpy(&addr->storage, sockaddr, (size_t) socklen);
     addr->len = (uint16_t) socklen;
 }
