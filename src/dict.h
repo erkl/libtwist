@@ -21,10 +21,10 @@
 
 /* Underlying hash table used by `twine__dict`. */
 struct twine__dict_table {
-    /* Array of hash buckets. */
-    struct twine_conn ** entries;
+    /* Array of hash table buckets. */
+    struct twine_conn ** buckets;
 
-    /* Size of the `entries` array; always a power of two. */
+    /* Size of the `buckets` array; always a power of two. */
     uint32_t size;
 
     /* Key mask; always `size-1`. */

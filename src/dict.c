@@ -35,20 +35,20 @@ static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
 int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_t seed[16]) {
-    struct twine_conn ** entries;
+    struct twine_conn ** buckets;
     int i;
 
     /* Allocate the initial array of hash buckets. */
-    entries = conf->malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
-    if (entries == NULL)
+    buckets = conf->malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
+    if (buckets == NULL)
         return TWINE_ENOMEM;
 
     for (i = 0; i < MIN_TABLE_SIZE; i++)
-        entries[i] = NULL;
+        buckets[i] = NULL;
 
     /* Initialize the dict instance. */
     dict->tables[0] = (struct twine__dict_table) {
-        .entries = entries,
+        .buckets = buckets,
         .size = MIN_TABLE_SIZE,
         .mask = MIN_TABLE_SIZE - 1,
     };
@@ -67,11 +67,11 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_
 
 /* Free the dict's internal hash table(s). */
 void twine__dict_destroy(struct twine__dict * dict) {
-    dict->conf->free(dict->tables[0].entries);
+    dict->conf->free(dict->tables[0].buckets);
 
     /* If we've created a second hash table, free its storage too. */
     if (dict->split > 0)
-        dict->conf->free(dict->tables[1].entries);
+        dict->conf->free(dict->tables[1].buckets);
 }
 
 
@@ -88,7 +88,7 @@ struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie)
 
     /* Search through all chained entries in the bucket. */
     index = locate_bucket(dict, cookie, &table);
-    conn = table->entries[index];
+    conn = table->buckets[index];
 
     while (conn != NULL && conn->local_cookie != cookie)
         conn = conn->chain;
@@ -123,9 +123,9 @@ int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn) {
     index = locate_bucket(dict, conn->local_cookie, &table);
 
     /* Insert the connection at the head of the bucket. */
-    head = table->entries[index];
+    head = table->buckets[index];
     conn->chain = head;
-    table->entries[index] = conn;
+    table->buckets[index] = conn;
 
     /* Update the entry count. */
     dict->count++;
@@ -157,7 +157,7 @@ int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn) {
 
     /* Find the head of the relevant hash bucket. */
     index = locate_bucket(dict, cookie, &table);
-    prev = &table->entries[index];
+    prev = &table->buckets[index];
 
     while ((conn = *prev) != NULL) {
         /* If we find a match, unlink it and stop. */
@@ -180,7 +180,7 @@ int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn) {
 /* Shrink or grow the dict's underlying hash table if utilization is too high
  * or too low. */
 static int maybe_resize(struct twine__dict * dict, int delta) {
-    struct twine_conn ** entries;
+    struct twine_conn ** buckets;
     uint64_t count;
     uint32_t size;
     uint32_t i;
@@ -199,16 +199,16 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
         return TWINE_OK;
 
     /* Allocate the underlying storage for our new hash table. */
-    entries = dict->conf->malloc(size * sizeof(struct twine__conn *));
-    if (entries == NULL)
+    buckets = dict->conf->malloc(size * sizeof(struct twine__conn *));
+    if (buckets == NULL)
         return TWINE_ENOMEM;
 
     for (i = 0; i < size; i++)
-        entries[i] = NULL;
+        buckets[i] = NULL;
 
     /* Initialize the spare table. */
     dict->tables[1] = (struct twine__dict_table) {
-        .entries = entries,
+        .buckets = buckets,
         .size = size,
         .mask = size - 1,
     };
@@ -229,8 +229,8 @@ static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
     uint32_t key;
 
     /* Grab the first entry, then clear the bucket. */
-    conn = dict->tables[0].entries[index];
-    dict->tables[0].entries[index] = NULL;
+    conn = dict->tables[0].buckets[index];
+    dict->tables[0].buckets[index] = NULL;
 
     /* Move all entries in the original chain. */
     while (conn != NULL) {
@@ -240,8 +240,8 @@ static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
         key = (uint32_t) nectar_siphash(dict->seed, (const uint8_t *) conn->local_cookie, 8);
         index = key & dict->tables[1].mask;
 
-        conn->chain = dict->tables[1].entries[index];
-        dict->tables[1].entries[index] = conn;
+        conn->chain = dict->tables[1].buckets[index];
+        dict->tables[1].buckets[index] = conn;
 
         /* Move on to the next chained entry. */
         conn = next;
@@ -267,7 +267,7 @@ static void migrate_buckets(struct twine__dict * dict, int num) {
 
     /* Once all bucket entries have been moved, drop the old hash table. */
     if (dict->split == 0) {
-        dict->conf->free(dict->tables[0].entries);
+        dict->conf->free(dict->tables[0].buckets);
         dict->tables[0] = dict->tables[1];
     }
 }
