@@ -213,9 +213,9 @@ static int less(struct twine__heap * heap, uint32_t i, uint32_t j) {
         if (y->next_tick >= 0)
             return 0;
     } else {
-        if (x->next_tick < y->next_tick)
+        if (x->next_tick < y->next_tick || y->next_tick < 0)
             return 1;
-        if (y->next_tick < x->next_tick)
+        if (x->next_tick > y->next_tick)
             return 0;
     }
 
