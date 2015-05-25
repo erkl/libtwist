@@ -12,6 +12,7 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
+#include "src/alloc.h"
 #include "src/prng.h"
 
 
@@ -30,11 +31,11 @@ static int seed(struct twine__prng * prng);
 
 /* Initialize the PRNG context. Returns TWINE_ENOMEM if a necessary memory
  * allocation fails, otherwise TWINE_OK. */
-int twine__prng_init(struct twine__prng * prng, struct twine_conf * conf) {
+int twine__prng_init(struct twine__prng * prng, struct twine__env * env) {
     uint8_t * buf;
 
     /* Allocate the buffer. */
-    buf = conf->malloc(BUFFER_SIZE);
+    buf = malloc(BUFFER_SIZE);
     if (buf == NULL)
         return TWINE_ENOMEM;
 
@@ -43,7 +44,7 @@ int twine__prng_init(struct twine__prng * prng, struct twine_conf * conf) {
     prng->size = BUFFER_SIZE;
     prng->consumed = BUFFER_SIZE;
     prng->reseed = 0;
-    prng->conf = conf;
+    prng->env = env;
 
     return TWINE_OK;
 }
@@ -51,7 +52,7 @@ int twine__prng_init(struct twine__prng * prng, struct twine_conf * conf) {
 
 /* Free the PRNG context's allocated memory. */
 void twine__prng_destroy(struct twine__prng * prng) {
-    prng->conf->free(prng->buf);
+    free(prng->buf);
 }
 
 
@@ -104,7 +105,7 @@ static int seed(struct twine__prng * prng) {
     size_t n;
 
     /* Request a 40-byte seed. */
-    n = prng->conf->read_entropy(buf, 40);
+    n = twine__env_entropy(prng->env, buf, 40);
     if (n != 40)
         return TWINE_EENTROPY;
 

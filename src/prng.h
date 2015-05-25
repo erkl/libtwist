@@ -18,6 +18,7 @@
 #include <nectar.h>
 
 #include "include/twine.h"
+#include "src/env.h"
 
 
 /* Generates non-deterministic bits using ChaCha20 keystreams. */
@@ -40,14 +41,14 @@ struct twine__prng {
      * context (key). */
     unsigned int reseed;
 
-    /* Socket configuration object. */
-    struct twine_conf * conf;
+    /* Environment. */
+    struct twine__env * env;
 };
 
 
 /* Initialize the PRNG context. Returns TWINE_ENOMEM if a necessary memory
  * allocation fails, otherwise TWINE_OK. */
-int twine__prng_init(struct twine__prng * prng, struct twine_conf * conf);
+int twine__prng_init(struct twine__prng * prng, struct twine__env * env);
 
 /* Free the PRNG context's allocated memory. */
 void twine__prng_destroy(struct twine__prng * prng);

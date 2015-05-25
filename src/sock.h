@@ -17,6 +17,7 @@
 
 #include "include/twine.h"
 #include "src/dict.h"
+#include "src/env.h"
 #include "src/prng.h"
 
 
@@ -32,8 +33,8 @@ struct twine_sock {
     /* Socket-wide psuedo-random number generator. */
     struct twine__prng prng;
 
-    /* Embedded socket configuration object. */
-    struct twine_conf conf;
+    /* Environment. */
+    struct twine__env env;
 };
 
 
