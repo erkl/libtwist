@@ -12,8 +12,6 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#include <limits.h>
-
 #include "include/twine.h"
 #include "src/alloc.h"
 #include "src/conn.h"

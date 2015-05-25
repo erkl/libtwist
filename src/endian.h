@@ -15,7 +15,7 @@
 #ifndef LIBTWINE_ENDIAN_H
 #define LIBTWINE_ENDIAN_H
 
-#include <stdint.h>
+#include "include/twine.h"
 
 
 /* Write a 64-bit integer to dst in big-endian form. */

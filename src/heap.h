@@ -15,6 +15,8 @@
 #ifndef LIBTWINE_HEAP_H
 #define LIBTWINE_HEAP_H
 
+#include "include/twine.h"
+
 
 /* This is a simple min-heap for storing connections ordered by when their
  * next time-based event is scheduled to occur. */

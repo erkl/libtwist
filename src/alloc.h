@@ -15,7 +15,7 @@
 #ifndef LIBTWINE_ALLOC_H
 #define LIBTWINE_ALLOC_H
 
-#include <stdlib.h>
+#include "include/twine.h"
 
 
 /* This would be where to swap the default memory management functions,

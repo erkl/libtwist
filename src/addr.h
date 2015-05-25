@@ -15,6 +15,8 @@
 #ifndef LIBTWINE_ADDR_H
 #define LIBTWINE_ADDR_H
 
+#include "include/twine.h"
+
 
 /* Maximum number of address bytes that will fit in a `twine__addr`. */
 #define MAX_ADDR_LEN  30
