@@ -14,6 +14,7 @@
 
 #include <nectar.h>
 
+#include "src/alloc.h"
 #include "src/dict.h"
 
 
@@ -34,12 +35,12 @@ static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
 
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
-int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_t seed[16]) {
+int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]) {
     struct twine_conn ** buckets;
     int i;
 
     /* Allocate the initial array of hash buckets. */
-    buckets = conf->malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
+    buckets = malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
     if (buckets == NULL)
         return TWINE_ENOMEM;
 
@@ -55,7 +56,6 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_
 
     dict->split = 0;
     dict->count = 0;
-    dict->conf = conf;
 
     /* Copy the seed. */
     for (i = 0; i < 16; i++)
@@ -67,11 +67,11 @@ int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_
 
 /* Free the dict's internal hash table(s). */
 void twine__dict_destroy(struct twine__dict * dict) {
-    dict->conf->free(dict->tables[0].buckets);
+    free(dict->tables[0].buckets);
 
     /* If we've created a second hash table, free its storage too. */
     if (dict->split > 0)
-        dict->conf->free(dict->tables[1].buckets);
+        free(dict->tables[1].buckets);
 }
 
 
@@ -199,7 +199,7 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
         return TWINE_OK;
 
     /* Allocate the underlying storage for our new hash table. */
-    buckets = dict->conf->malloc(size * sizeof(struct twine__conn *));
+    buckets = malloc(size * sizeof(struct twine__conn *));
     if (buckets == NULL)
         return TWINE_ENOMEM;
 
@@ -267,7 +267,7 @@ static void migrate_buckets(struct twine__dict * dict, int num) {
 
     /* Once all bucket entries have been moved, drop the old hash table. */
     if (dict->split == 0) {
-        dict->conf->free(dict->tables[0].buckets);
+        free(dict->tables[0].buckets);
         dict->tables[0] = dict->tables[1];
     }
 }

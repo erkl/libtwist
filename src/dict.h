@@ -49,16 +49,12 @@ struct twine__dict {
 
     /* Number of entries currently stored in the dict. */
     uint64_t count;
-
-    /* Socket configuration object, used here only for its memory management
-     * functions. */
-    struct twine_conf * conf;
 };
 
 
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
-int twine__dict_init(struct twine__dict * dict, struct twine_conf * conf, uint8_t seed[16]);
+int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]);
 
 /* Free the dict's internal hash table(s). */
 void twine__dict_destroy(struct twine__dict * dict);

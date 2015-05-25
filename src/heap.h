@@ -27,15 +27,12 @@ struct twine__heap {
 
     /* The underlying storage array's maximum capacity. */
     uint32_t size;
-
-    /* Socket configuration. */
-    struct twine_conf * conf;
 };
 
 
 /* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
  * allocation failed, otherwise TWINE_OK. */
-int twine__heap_init(struct twine__heap * heap, struct twine_conf * conf);
+int twine__heap_init(struct twine__heap * heap);
 
 /* Free the heap's underlying storage. */
 void twine__heap_destroy(struct twine__heap * heap);

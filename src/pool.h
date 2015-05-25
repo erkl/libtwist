@@ -33,14 +33,11 @@ struct twine__pool {
 
     /* Number of free objects in the pool. */
     unsigned int count;
-
-    /* Socket configuration object. */
-    struct twine_conf * conf;
 };
 
 
 /* Initialize an object pool. */
-void twine__pool_init(struct twine__pool * pool, struct twine_conf * conf);
+void twine__pool_init(struct twine__pool * pool);
 
 /* Free all but `keep` objects from the pool. If there are already fewer than
  * `keep + 1` objects in the pool the function call does nothing. */

@@ -15,14 +15,14 @@
 #include <limits.h>
 
 #include "include/twine.h"
+#include "src/alloc.h"
 #include "src/pool.h"
 
 
 /* Initialize an object pool. */
-void twine__pool_init(struct twine__pool * pool, struct twine_conf * conf) {
+void twine__pool_init(struct twine__pool * pool) {
     pool->head = NULL;
     pool->count = 0;
-    pool->conf = conf;
 }
 
 
@@ -34,7 +34,7 @@ void twine__pool_cull(struct twine__pool * pool, unsigned int keep) {
     /* Free objects until only `keep` are left. */
     while (pool->count > keep) {
         next = *((void **) pool->head);
-        pool->conf->free(pool->head);
+        free(pool->head);
         pool->head = next;
         pool->count--;
     }
@@ -50,7 +50,7 @@ void * twine__pool_alloc(struct twine__pool * pool) {
         pool->head = *((void **) obj);
         pool->count--;
     } else {
-        obj = pool->conf->malloc(POOL_OBJECT_SIZE);
+        obj = malloc(POOL_OBJECT_SIZE);
     }
 
     return obj;
@@ -62,7 +62,7 @@ void * twine__pool_alloc(struct twine__pool * pool) {
 void twine__pool_free(struct twine__pool * pool, void * obj) {
     /* Doesn't hurt to be paranoid about these things. */
     if (pool->count == UINT_MAX) {
-        pool->conf->free(obj);
+        free(obj);
         return;
     }
 

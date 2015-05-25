@@ -41,24 +41,8 @@ struct twine_sock;
 struct twine_conn;
 
 
-/* Socket-wide configuration parameters. */
-struct twine_conf {
-    /* Send a UDP packet. */
-    void (*send_packet)(const struct sockaddr * addr, socklen_t addrlen,
-                        const uint8_t * buf, size_t len);
-
-    /* Source of random data. */
-    size_t (*read_entropy)(uint8_t * buf, size_t len);
-
-    /* Memory management. */
-    void * (*malloc)(size_t size);
-    void * (*realloc)(void * ptr, size_t size);
-    void (*free)(void * ptr);
-};
-
-
 /* TODO: Documentation. */
-int twine_create(struct twine_sock ** sockptr, struct twine_conf * conf);
+int twine_create(struct twine_sock ** sockptr);
 
 /* TODO: Documentation. */
 int64_t twine_tick(struct twine_sock * sock, int64_t now);

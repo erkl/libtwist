@@ -15,6 +15,7 @@
 #include <limits.h>
 
 #include "include/twine.h"
+#include "src/alloc.h"
 #include "src/conn.h"
 #include "src/heap.h"
 
@@ -36,11 +37,11 @@ static void swap(struct twine__heap * heap, uint32_t i, uint32_t j);
 
 /* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
  * allocation failed, otherwise TWINE_OK. */
-int twine__heap_init(struct twine__heap * heap, struct twine_conf * conf) {
+int twine__heap_init(struct twine__heap * heap) {
     struct twine_conn ** entries;
 
     /* Allocate the initial storage array. */
-    entries = conf->malloc(MIN_HEAP_SIZE * sizeof(struct twine_conn *));
+    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twine_conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
@@ -48,7 +49,6 @@ int twine__heap_init(struct twine__heap * heap, struct twine_conf * conf) {
     heap->entries = entries;
     heap->count = 0;
     heap->size = MIN_HEAP_SIZE;
-    heap->conf = conf;
 
     return TWINE_OK;
 }
@@ -56,7 +56,7 @@ int twine__heap_init(struct twine__heap * heap, struct twine_conf * conf) {
 
 /* Free the heap's underlying storage. */
 void twine__heap_destroy(struct twine__heap * heap) {
-    heap->conf->free(heap->entries);
+    free(heap->entries);
 }
 
 
@@ -138,7 +138,7 @@ static int resize(struct twine__heap * heap, uint32_t size) {
     struct twine_conn ** entries;
 
     /* Allocate new storage. */
-    entries = heap->conf->realloc(heap->entries, size * sizeof(struct twine_conn *));
+    entries = realloc(heap->entries, size * sizeof(struct twine_conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
