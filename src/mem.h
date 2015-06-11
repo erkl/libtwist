@@ -12,14 +12,14 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_ALLOC_H
-#define LIBTWINE_ALLOC_H
+#ifndef LIBTWINE_MEM_H
+#define LIBTWINE_MEM_H
 
 #include "include/twine.h"
 
 
-/* This would be where to swap the default memory management functions,
- * if you were so inclined. */
+/* This would be where to replace the default memory management functions,
+ * if one were so inclined. */
 #define malloc   malloc
 #define realloc  realloc
 #define free     free

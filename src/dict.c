@@ -14,8 +14,8 @@
 
 #include <nectar.h>
 
-#include "src/alloc.h"
 #include "src/dict.h"
+#include "src/mem.h"
 
 
 /* Minimum (default) and maximum hash table sizes. The maximum size may seem

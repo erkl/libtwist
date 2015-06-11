@@ -13,9 +13,9 @@
  * PERFORMANCE OF THIS SOFTWARE. */
 
 #include "include/twine.h"
-#include "src/alloc.h"
 #include "src/conn.h"
 #include "src/heap.h"
+#include "src/mem.h"
 
 
 /* Minimum (default) and maximum hash table sizes. The maximum size may seem
