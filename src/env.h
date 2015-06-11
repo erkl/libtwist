@@ -19,9 +19,8 @@
 #include "src/addr.h"
 
 
-/* The `twine__env` struct holds a set of user-provided functions which together
- * form the complete interface used by a socket and its connections to interact
- * with the outside world. */
+/* The functions defined in the `twine__env` struct form the sole interface
+ * used by sockets to interact with the outside world. */
 struct twine__env {
     /* User-provided function for sending UDP packets. */
     void (*send_packet)(const struct sockaddr * addr, socklen_t addrlen,
