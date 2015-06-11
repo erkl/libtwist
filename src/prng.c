@@ -20,7 +20,7 @@
  * and b) how many times we may fill it before re-keying our ChaCha20 context.
  *
  * TODO: Would letting the user specify these values be a decent idea,
- * or a terrible one? */
+ *       or a terrible one? */
 #define BUFFER_SIZE      1024
 #define RESEED_INTERVAL  64
 
