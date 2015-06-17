@@ -14,7 +14,6 @@
 
 #include <limits.h>
 
-#include "include/twine.h"
 #include "src/mem.h"
 #include "src/pool.h"
 

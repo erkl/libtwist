@@ -13,8 +13,8 @@
  * PERFORMANCE OF THIS SOFTWARE. */
 
 #include <string.h>
+#include <sys/socket.h>
 
-#include "include/twine.h"
 #include "src/addr.h"
 
 

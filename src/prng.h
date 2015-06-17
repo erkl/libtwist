@@ -15,6 +15,8 @@
 #ifndef LIBTWINE_PRNG_H
 #define LIBTWINE_PRNG_H
 
+#include <nectar.h>
+
 #include "include/twine.h"
 #include "src/env.h"
 

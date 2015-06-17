@@ -15,6 +15,8 @@
 #ifndef LIBTWINE_MEM_H
 #define LIBTWINE_MEM_H
 
+#include <stdlib.h>
+
 #include "include/twine.h"
 
 
