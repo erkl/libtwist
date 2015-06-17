@@ -28,18 +28,16 @@
 
 /* Describes an incoming or outgoing packet. */
 struct twine__packet {
-    /* Packet payload. The buffer array will always be allocated immediately
-     * after the packet struct itself, but I prefer an explicit pointer over
-     * a fancy macro. */
+    /* Source/destination address. */
+    struct twine__addr addr;
+
+    /* Packet payload. The payload will always be allocated immediately after
+     * the packet struct header itself, but an explicit pointer is way better
+     * than pointer arithmetic. */
     uint8_t * payload;
+
+    /* Packet payload size. */
     size_t len;
-
-    /* Remote address. */
-    struct twine__addr remote;
-
-    /* Intrusive list pointers. */
-    struct twine__packet * prev;
-    struct twine__packet * next;
 };
 
 
