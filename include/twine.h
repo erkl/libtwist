@@ -15,14 +15,10 @@
 #ifndef LIBTWINE_H
 #define LIBTWINE_H
 
-#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-
-#include <nectar.h>
 
 
 /* Error codes. */
