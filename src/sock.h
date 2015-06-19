@@ -18,17 +18,36 @@
 #include "include/twine.h"
 #include "src/dict.h"
 #include "src/env.h"
+#include "src/heap.h"
+#include "src/pool.h"
 #include "src/prng.h"
+#include "src/register.h"
 
 
-/* Socket handle, opaque to the user. */
+/* Socket state. */
 struct twine_sock {
-    /* Hash table containing all known connections, keyed by their
-     * connection cookies. */
+    /* The beginning of time, as far as this socket is concerned. */
+    int64_t first_tick;
+
+    /* We make sure that time never goes backwards by always keeping track
+     * of the previous tick value. */
+    int64_t last_tick;
+
+    /* This field holds the next clock tick which will affect a connection's
+     * state. Essentially a shortcut for `twine__heap_peek(heap)->next_tick`. */
+    int64_t next_tick;
+
+    /* Connections ordered by their `next_tick` values. */
+    struct twine__heap heap;
+
+    /* Hash table of connections keyed by their local cookies. */
     struct twine__dict dict;
 
-    /* Circular linked list of established connections. */
-    struct twine_conn * conns;
+    /* Strike-register for source address tokens. */
+    struct twine__register reg;
+
+    /* Shared memory pool. */
+    struct twine__pool pool;
 
     /* Socket-wide psuedo-random number generator. */
     struct twine__prng prng;
