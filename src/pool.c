@@ -25,6 +25,12 @@ void twine__pool_init(struct twine__pool * pool) {
 }
 
 
+/* Free all objects owned by the pool. */
+void twine__pool_clear(struct twine__pool * pool) {
+    twine__pool_cull(pool, 0);
+}
+
+
 /* Free all but `keep` objects from the pool. If the pool doesn't contain more
  * than `keep` objects the function call does nothing. */
 void twine__pool_cull(struct twine__pool * pool, unsigned int keep) {
