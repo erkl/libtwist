@@ -55,7 +55,7 @@ struct twine__register {
 
 /* Initialize the register. Returns TWINE_ENOMEM if a necessary allocation
  * failed, otherwise TWINE_OK. */
-int twine__register_init(struct twine__register * reg, uint32_t lifetime, int64_t now);
+int twine__register_init(struct twine__register * reg, uint32_t lifetime);
 
 /* Free all heap memory managed by the register. */
 void twine__register_destroy(struct twine__register * reg);

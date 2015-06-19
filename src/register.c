@@ -36,7 +36,7 @@ static int resize(struct twine__register * reg, uint32_t size,
 
 /* Initialize the register. Returns TWINE_ENOMEM if a necessary allocation
  * failed, otherwise TWINE_OK. */
-int twine__register_init(struct twine__register * reg, uint32_t lifetime, int64_t now) {
+int twine__register_init(struct twine__register * reg, uint32_t lifetime) {
     uint32_t * offsets;
     uint32_t * bits;
 
