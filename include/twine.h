@@ -29,13 +29,6 @@
 #define TWINE_EAGAIN    (-4)
 
 
-/* Connection states. */
-#define TWINE_CLOSED              (0)
-#define TWINE_HANDSHAKE_SENT      (1)
-#define TWINE_HANDSHAKE_RECEIVED  (2)
-#define TWINE_ESTABLISHED         (3)
-
-
 /* Opaque socket and connection handles. */
 struct twine_sock;
 struct twine_conn;
@@ -63,9 +56,6 @@ int twine_dial(struct twine_sock * sock, struct twine_conn ** connptr,
 /* TODO: Documentation. */
 int twine_accept(struct twine_sock * sock, struct twine_conn ** connptr, int64_t timeout);
 
-
-/* TODO: Documentation. */
-int twine_state(struct twine_conn * conn);
 
 /* TODO: Documentation. */
 ssize_t twine_read(struct twine_conn * conn, uint8_t * buf, size_t len);
