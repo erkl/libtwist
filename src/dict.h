@@ -22,7 +22,7 @@
 /* Underlying hash table used by `twine__dict`. */
 struct twine__dict_table {
     /* Array of hash table buckets. */
-    struct twine_conn ** buckets;
+    struct twine__conn ** buckets;
 
     /* Size of the `buckets` array; always a power of two. */
     uint32_t size;
@@ -62,7 +62,7 @@ void twine__dict_clear(struct twine__dict * dict);
 
 /* Look up a connection in the dict by its local connection cookie. The
  * returned pointer will be NULL if no matching entry could be found. */
-struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie);
+struct twine__conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie);
 
 /* Add a connection entry to the dict. The call will return zero on success,
  * or TWINE_ENOMEM if the dict is large enough that the underlying hash table
@@ -70,10 +70,10 @@ struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie)
  *
  * The implementation makes the assumption that local connection cookies are
  * unique, and that the same connection won't be inserted twice. */
-int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn);
+int twine__dict_add(struct twine__dict * dict, struct twine__conn * conn);
 
 /* Remove a connection entry from the dict. */
-int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn);
+int twine__dict_remove(struct twine__dict * dict, struct twine__conn * conn);
 
 
 #endif

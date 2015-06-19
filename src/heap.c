@@ -35,10 +35,10 @@ static void swap(struct twine__heap * heap, uint32_t i, uint32_t j);
 /* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
  * allocation failed, otherwise TWINE_OK. */
 int twine__heap_init(struct twine__heap * heap) {
-    struct twine_conn ** entries;
+    struct twine__conn ** entries;
 
     /* Allocate the initial storage array. */
-    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twine_conn *));
+    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twine__conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
@@ -59,13 +59,13 @@ void twine__heap_clear(struct twine__heap * heap) {
 
 /* Grab a pointer to the heap's top-most connection, or NULL if the heap
  * is empty. */
-struct twine_conn * twine__heap_peek(struct twine__heap * heap) {
+struct twine__conn * twine__heap_peek(struct twine__heap * heap) {
     return (heap->count > 0 ? heap->entries[0] : NULL);
 }
 
 
 /* Push a new connection onto the heap. */
-int twine__heap_add(struct twine__heap * heap, struct twine_conn * conn) {
+int twine__heap_add(struct twine__heap * heap, struct twine__conn * conn) {
     int ret;
 
     /* If the underlying array is already full, grow it. */
@@ -92,7 +92,7 @@ int twine__heap_add(struct twine__heap * heap, struct twine_conn * conn) {
 
 
 /* Remove a connection from the heap. */
-int twine__heap_remove(struct twine__heap * heap, struct twine_conn * conn) {
+int twine__heap_remove(struct twine__heap * heap, struct twine__conn * conn) {
     uint32_t index;
     int ret;
 
@@ -118,7 +118,7 @@ int twine__heap_remove(struct twine__heap * heap, struct twine_conn * conn) {
 
 /* Re-establish the heap ordering after a particular entry's `next_tick` value
  * has changed. */
-void twine__heap_fix(struct twine__heap * heap, struct twine_conn * conn) {
+void twine__heap_fix(struct twine__heap * heap, struct twine__conn * conn) {
     uint32_t index;
 
     /* Load the original index, because `conn->heap_index` may be modified
@@ -132,10 +132,10 @@ void twine__heap_fix(struct twine__heap * heap, struct twine_conn * conn) {
 
 /* Resize the heap's underlying storage. */
 static int resize(struct twine__heap * heap, uint32_t size) {
-    struct twine_conn ** entries;
+    struct twine__conn ** entries;
 
     /* Allocate new storage. */
-    entries = realloc(heap->entries, size * sizeof(struct twine_conn *));
+    entries = realloc(heap->entries, size * sizeof(struct twine__conn *));
     if (entries == NULL)
         return TWINE_ENOMEM;
 
@@ -199,7 +199,7 @@ static void down(struct twine__heap * heap, uint32_t index) {
 /* Compare two entries in the heap. Returns a non-zero value if the entry
  * at index `i` should be put in fron of the entry at index `j`. */
 static int less(struct twine__heap * heap, uint32_t i, uint32_t j) {
-    struct twine_conn * x, * y;
+    struct twine__conn * x, * y;
 
     /* Grab the two connections. */
     x = heap->entries[i];
@@ -228,7 +228,7 @@ static int less(struct twine__heap * heap, uint32_t i, uint32_t j) {
 
 /* Swap the position of entries in the heap. */
 static void swap(struct twine__heap * heap, uint32_t i, uint32_t j) {
-    struct twine_conn * x, * y;
+    struct twine__conn * x, * y;
 
     x = heap->entries[i];
     y = heap->entries[j];

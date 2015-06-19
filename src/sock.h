@@ -25,7 +25,7 @@
 
 
 /* Socket state. */
-struct twine_sock {
+struct twine__sock {
     /* The beginning of time, as far as this socket is concerned. */
     int64_t first_tick;
 

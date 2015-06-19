@@ -22,7 +22,7 @@
  * next time-based event is scheduled to occur. */
 struct twine__heap {
     /* Underlying storage array. */
-    struct twine_conn ** entries;
+    struct twine__conn ** entries;
 
     /* Number of connections currently stored in the heap. */
     uint32_t count;
@@ -41,18 +41,18 @@ void twine__heap_clear(struct twine__heap * heap);
 
 
 /* Get the heap's top-most connection, or NULL if the heap is empty. */
-struct twine_conn * twine__heap_peek(struct twine__heap * heap);
+struct twine__conn * twine__heap_peek(struct twine__heap * heap);
 
 /* Push a new connection onto the heap. */
-int twine__heap_add(struct twine__heap * heap, struct twine_conn * conn);
+int twine__heap_add(struct twine__heap * heap, struct twine__conn * conn);
 
 /* Remove a connection from the heap. */
-int twine__heap_remove(struct twine__heap * heap, struct twine_conn * conn);
+int twine__heap_remove(struct twine__heap * heap, struct twine__conn * conn);
 
 
 /* Re-establish heap ordering after a particular connection's `next_tick`
  * value has changed. */
-void twine__heap_fix(struct twine__heap * heap, struct twine_conn * conn);
+void twine__heap_fix(struct twine__heap * heap, struct twine__conn * conn);
 
 
 #endif

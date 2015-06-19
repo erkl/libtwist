@@ -36,7 +36,7 @@ static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
 /* Initialize a dict instance. The call returns zero or success, or
  * TWINE_ENOMEM if a necessary allocation failed. */
 int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]) {
-    struct twine_conn ** buckets;
+    struct twine__conn ** buckets;
     int i;
 
     /* Allocate the initial array of hash buckets. */
@@ -77,9 +77,9 @@ void twine__dict_clear(struct twine__dict * dict) {
 
 /* Look up a connection in the dict by its local connection cookie. The
  * returned pointer will be NULL if no matching entry could be found. */
-struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie) {
+struct twine__conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie) {
     struct twine__dict_table * table;
-    struct twine_conn * conn;
+    struct twine__conn * conn;
     uint32_t index;
 
     /* If we're resizing the underlying hash table, move some buckets. */
@@ -103,9 +103,9 @@ struct twine_conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie)
  *
  * The implementation makes the assumption that local connection cookies are
  * unique, and that the same connection won't be inserted twice. */
-int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn) {
+int twine__dict_add(struct twine__dict * dict, struct twine__conn * conn) {
     struct twine__dict_table * table;
-    struct twine_conn * head;
+    struct twine__conn * head;
     uint32_t index;
     int ret;
 
@@ -135,9 +135,9 @@ int twine__dict_add(struct twine__dict * dict, struct twine_conn * conn) {
 
 
 /* Remove a connection entry from the dict. */
-int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn) {
+int twine__dict_remove(struct twine__dict * dict, struct twine__conn * conn) {
     struct twine__dict_table * table;
-    struct twine_conn ** prev;
+    struct twine__conn ** prev;
     uint64_t cookie;
     uint32_t index;
     int ret;
@@ -180,7 +180,7 @@ int twine__dict_remove(struct twine__dict * dict, struct twine_conn * conn) {
 /* Shrink or grow the dict's underlying hash table if utilization is too high
  * or too low. */
 static int maybe_resize(struct twine__dict * dict, int delta) {
-    struct twine_conn ** buckets;
+    struct twine__conn ** buckets;
     uint64_t count;
     uint32_t size;
     uint32_t i;
@@ -225,7 +225,7 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
 /* Move all entries from a bucket in the current hash table to their new
  * positions in the new hash table. */
 static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
-    struct twine_conn * conn, * next;
+    struct twine__conn * conn, * next;
     uint32_t key;
 
     /* Grab the first entry, then clear the bucket. */

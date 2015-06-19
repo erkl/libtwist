@@ -20,13 +20,13 @@
 #include "src/packet.h"
 
 
-/* Connection handle, opaque to the user. */
-struct twine_conn {
+/* Connection state. */
+struct twine__conn {
+    /* Owning socket. */
+    struct twine__sock * sock;
+
     /* Connection state. */
     int state;
-
-    /* Owning socket. */
-    struct twine_sock * sock;
 
     /* Local and remote connection cookies. */
     uint64_t local_cookie;
@@ -39,7 +39,7 @@ struct twine_conn {
     uint32_t heap_index;
 
     /* Intrusive pointer for hash table chaining. */
-    struct twine_conn * chain;
+    struct twine__conn * chain;
 
     /* Buffers for outgoing and incoming data. */
     struct twine__buffer write_buffer;
