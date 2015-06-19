@@ -18,6 +18,40 @@
 #include "include/twine.h"
 
 
+/* Write a 24-bit integer to dst in big-endian form. */
+static inline void be24enc(uint8_t dst[3], uint32_t x) {
+    dst[0] = (uint8_t) (x >> 16);
+    dst[1] = (uint8_t) (x >> 8);
+    dst[2] = (uint8_t) x;
+}
+
+
+/* Read a 24-bit integer from src in big-endian form. */
+static inline uint32_t be24dec(const uint8_t src[3]) {
+    return ((uint32_t) src[0]) << 16
+         | ((uint32_t) src[1]) << 8
+         | ((uint32_t) src[2]);
+}
+
+
+/* Write a 32-bit integer to dst in big-endian form. */
+static inline void be32enc(uint8_t dst[4], uint32_t x) {
+    dst[0] = (uint8_t) (x >> 24);
+    dst[1] = (uint8_t) (x >> 16);
+    dst[2] = (uint8_t) (x >> 8);
+    dst[3] = (uint8_t) x;
+}
+
+
+/* Read a 32-bit integer from src in big-endian form. */
+static inline uint32_t be32dec(const uint8_t src[4]) {
+    return ((uint32_t) src[0]) << 24
+         | ((uint32_t) src[1]) << 16
+         | ((uint32_t) src[2]) << 8
+         | ((uint32_t) src[3]);
+}
+
+
 /* Write a 64-bit integer to dst in big-endian form. */
 static inline void be64enc(uint8_t dst[8], uint64_t x) {
     dst[0] = (uint8_t) (x >> 56);
