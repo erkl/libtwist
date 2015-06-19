@@ -57,7 +57,7 @@ struct twine__dict {
 int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]);
 
 /* Free the dict's internal hash table(s). */
-void twine__dict_destroy(struct twine__dict * dict);
+void twine__dict_clear(struct twine__dict * dict);
 
 
 /* Look up a connection in the dict by its local connection cookie. The

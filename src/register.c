@@ -69,7 +69,7 @@ int twine__register_init(struct twine__register * reg, uint32_t lifetime) {
 
 
 /* Free all heap memory managed by the register. */
-void twine__register_destroy(struct twine__register * reg) {
+void twine__register_clear(struct twine__register * reg) {
     free(reg->offsets);
     free(reg->bits);
 }

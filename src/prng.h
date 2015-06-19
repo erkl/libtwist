@@ -51,7 +51,7 @@ struct twine__prng {
 int twine__prng_init(struct twine__prng * prng, struct twine__env * env);
 
 /* Free the PRNG context's allocated memory. */
-void twine__prng_destroy(struct twine__prng * prng);
+void twine__prng_clear(struct twine__prng * prng);
 
 /* Read `len` non-deterministic bytes into `buf`. If the PRNG's internal
  * ChaCha20 context needs to be rekeyed, and user-supplied `read_entropy`

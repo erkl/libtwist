@@ -51,7 +51,7 @@ int twine__prng_init(struct twine__prng * prng, struct twine__env * env) {
 
 
 /* Free the PRNG context's allocated memory. */
-void twine__prng_destroy(struct twine__prng * prng) {
+void twine__prng_clear(struct twine__prng * prng) {
     free(prng->buf);
 }
 

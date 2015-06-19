@@ -66,7 +66,7 @@ int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]) {
 
 
 /* Free the dict's internal hash table(s). */
-void twine__dict_destroy(struct twine__dict * dict) {
+void twine__dict_clear(struct twine__dict * dict) {
     free(dict->tables[0].buckets);
 
     /* If we've created a second hash table, free its storage too. */

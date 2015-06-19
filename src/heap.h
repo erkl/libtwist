@@ -37,7 +37,7 @@ struct twine__heap {
 int twine__heap_init(struct twine__heap * heap);
 
 /* Free the heap's underlying storage. */
-void twine__heap_destroy(struct twine__heap * heap);
+void twine__heap_clear(struct twine__heap * heap);
 
 
 /* Get the heap's top-most connection, or NULL if the heap is empty. */
