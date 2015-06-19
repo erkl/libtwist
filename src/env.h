@@ -44,7 +44,7 @@ static inline void twine__env_send(struct twine__env * env, const struct twine__
 }
 
 
-/* Read random `len` bytes of random data. */
+/* Read `len` bytes of random data. */
 static inline size_t twine__env_entropy(struct twine__env * env, uint8_t * buf, size_t len) {
     return env->read_entropy(buf, len, env->priv);
 }
