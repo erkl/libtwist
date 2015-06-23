@@ -15,6 +15,8 @@
 #ifndef LIBTWIST_PACKET_H
 #define LIBTWIST_PACKET_H
 
+#include <string.h>
+
 #include "include/twist.h"
 #include "src/addr.h"
 
@@ -39,6 +41,26 @@ struct twist__packet {
     /* Packet payload size. */
     size_t len;
 };
+
+
+/* Initialize a packet. */
+static inline void twist__packet_init(struct twist__packet * pkt,
+                                      const struct sockaddr * addr, socklen_t addrlen,
+                                      const uint8_t * payload, size_t len) {
+    uint8_t * base;
+
+    /* Use the space after the `struct twist__packet` fields to store the
+     * packet's payload. This relies on the assumption that `pkt` is an object
+     * managed by a `twist__pool`. */
+    base = ((uint8_t *) pkt) + sizeof(struct twist__packet);
+    memcpy(base, payload, len);
+
+    /* Store the address, and the payload base and length. */
+    twist__addr_load(&pkt->addr, addr, addrlen);
+
+    pkt->payload = base;
+    pkt->len = len;
+}
 
 
 #endif
