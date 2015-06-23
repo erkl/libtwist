@@ -197,7 +197,7 @@ static void down(struct twist__heap * heap, uint32_t index) {
 
 
 /* Compare two entries in the heap. Returns a non-zero value if the entry
- * at index `i` should be put in fron of the entry at index `j`. */
+ * at index `i` should be put in front of the entry at index `j`. */
 static int less(struct twist__heap * heap, uint32_t i, uint32_t j) {
     struct twist__conn * x, * y;
 
