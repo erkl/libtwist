@@ -20,7 +20,7 @@
 
 /* Construct an address from a plain `sockaddr` struct. */
 void twist__addr_load(struct twist__addr * addr,
-                      struct sockaddr * sockaddr, socklen_t socklen) {
+                      const struct sockaddr * sockaddr, socklen_t socklen) {
     memset(addr, 0, sizeof(struct twist__addr));
     memcpy(addr, sockaddr, (size_t) socklen);
     addr->len = (uint16_t) socklen;
@@ -28,6 +28,6 @@ void twist__addr_load(struct twist__addr * addr,
 
 
 /* Copy the value of the address `from` into `addr`. */
-void twist__addr_copy(struct twist__addr * addr, struct twist__addr * from) {
+void twist__addr_copy(struct twist__addr * addr, const struct twist__addr * from) {
     memcpy(addr, from, sizeof(struct twist__addr));
 }

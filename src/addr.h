@@ -36,10 +36,10 @@ struct twist__addr {
 
 /* Construct an address from a plain `sockaddr` struct. */
 void twist__addr_load(struct twist__addr * addr,
-                      struct sockaddr * sockaddr, socklen_t socklen);
+                      const struct sockaddr * sockaddr, socklen_t socklen);
 
 /* Copy the value of the address `from` into `addr`. */
-void twist__addr_copy(struct twist__addr * addr, struct twist__addr * from);
+void twist__addr_copy(struct twist__addr * addr, const struct twist__addr * from);
 
 
 #endif
