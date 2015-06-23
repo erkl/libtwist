@@ -22,13 +22,13 @@
 /* The functions defined in the `twist__env` struct form the sole interface
  * used by sockets to interact with the outside world. */
 struct twist__env {
-    /* User-provided function for sending UDP packets. */
-    void (*send_packet)(const struct sockaddr * addr, socklen_t addrlen,
-                        const uint8_t * payload, size_t len, void * priv);
-
     /* User-provided function which can be used to read truly random bytes,
      * preferably using a source like `/dev/urandom`. */
     size_t (*read_entropy)(uint8_t * buf, size_t len, void * priv);
+
+    /* User-provided function for sending UDP packets. */
+    int (*send_packet)(const struct sockaddr * addr, socklen_t addrlen,
+                       const uint8_t * payload, size_t len, void * priv);
 
     /* Arbitrary pointer provided by the user for the socket, which will be
      * passed along with each call to any of the functions above. */
@@ -36,17 +36,18 @@ struct twist__env {
 };
 
 
-/* Send a UDP packet to `addr`. */
-static inline void twist__env_send(struct twist__env * env, const struct twist__addr * addr,
-                                   const uint8_t * payload, size_t len) {
-    env->send_packet((const struct sockaddr *) addr, (socklen_t) addr->len,
-                     payload, len, env->priv);
-}
-
-
 /* Read `len` bytes of random data. */
 static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, size_t len) {
     return env->read_entropy(buf, len, env->priv);
+}
+
+
+/* Send a UDP packet to `addr`. */
+static inline int twist__env_send(struct twist__env * env, const struct twist__addr * addr,
+                                  const uint8_t * payload, size_t len) {
+    int ret = env->send_packet((const struct sockaddr *) addr, (socklen_t) addr->len,
+                               payload, len, env->priv);
+    return (ret != 0 ? TWIST_ETRANSMIT : 0);
 }
 
 
