@@ -43,16 +43,16 @@ void twist__pool_init(struct twist__pool * pool);
 void twist__pool_clear(struct twist__pool * pool);
 
 
-/* Free all but `keep` objects from the pool. If there are already fewer than
- * `keep + 1` objects in the pool the function call does nothing. */
-void twist__pool_cull(struct twist__pool * pool, unsigned int keep);
-
 /* Grab an object from the pool or, if the pool is empty, allocate a new one. */
 void * twist__pool_alloc(struct twist__pool * pool);
 
 /* Recycle an object back into the pool. If the pool is already at capacity,
  * the object will be freed. */
 void twist__pool_free(struct twist__pool * pool, void * obj);
+
+/* Free all but `keep` objects from the pool. If there are already fewer than
+ * `keep + 1` objects in the pool the function call does nothing. */
+void twist__pool_cull(struct twist__pool * pool, unsigned int keep);
 
 
 #endif

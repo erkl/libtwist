@@ -31,21 +31,6 @@ void twist__pool_clear(struct twist__pool * pool) {
 }
 
 
-/* Free all but `keep` objects from the pool. If the pool doesn't contain more
- * than `keep` objects the function call does nothing. */
-void twist__pool_cull(struct twist__pool * pool, unsigned int keep) {
-    void * next;
-
-    /* Free objects until only `keep` are left. */
-    while (pool->count > keep) {
-        next = *((void **) pool->head);
-        free(pool->head);
-        pool->head = next;
-        pool->count--;
-    }
-}
-
-
 /* Grab an object from the pool or, if the pool is empty, allocate a new one. */
 void * twist__pool_alloc(struct twist__pool * pool) {
     void * obj;
@@ -77,4 +62,19 @@ void twist__pool_free(struct twist__pool * pool, void * obj) {
 
     pool->head = obj;
     pool->count++;
+}
+
+
+/* Free all but `keep` objects from the pool. If the pool doesn't contain more
+ * than `keep` objects the function call does nothing. */
+void twist__pool_cull(struct twist__pool * pool, unsigned int keep) {
+    void * next;
+
+    /* Free objects until only `keep` are left. */
+    while (pool->count > keep) {
+        next = *((void **) pool->head);
+        free(pool->head);
+        pool->head = next;
+        pool->count--;
+    }
 }
