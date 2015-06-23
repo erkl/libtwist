@@ -48,18 +48,18 @@ struct twist__conn {
 
 
 /* Allocate and initialize a connection struct. */
-int64_t twist__conn_create(struct twist_conn ** connptr, struct twist_sock * sock,
+int64_t twist__conn_create(struct twist__conn ** connptr, struct twist_sock * sock,
                            uint64_t local_cookie, uint64_t remote_cookie);
 
 /* Free all memory owned by the connection struct. */
-void twist__conn_destroy(struct twist_conn ** connptr);
+void twist__conn_destroy(struct twist__conn ** connptr);
 
 
 /* Propagate a time event to the connection's state machine. */
-int64_t twist__conn_tick(struct twist_conn * conn, int64_t now);
+int64_t twist__conn_tick(struct twist__conn * conn, int64_t now);
 
 /* Feed a received packet to the connection's state machine. */
-int64_t twist__conn_recv(struct twist_conn * conn, struct twist__packet * packet, int64_t now);
+int64_t twist__conn_recv(struct twist__conn * conn, struct twist__packet * packet, int64_t now);
 
 
 #endif
