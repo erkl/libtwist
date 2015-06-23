@@ -23,7 +23,7 @@ void twist__addr_load(struct twist__addr * addr,
                       const struct sockaddr * sockaddr, socklen_t socklen) {
     memset(addr, 0, sizeof(struct twist__addr));
     memcpy(addr, sockaddr, (size_t) socklen);
-    addr->len = (uint16_t) socklen;
+    addr->len = (uint8_t) socklen;
 }
 
 

@@ -19,18 +19,18 @@
 
 
 /* Maximum number of address bytes that will fit in a `twist__addr`. */
-#define MAX_ADDR_LEN  30
+#define MAX_ADDR_LEN  31
 
 
 /* This struct represents a network address. It basically functions as a much
  * smaller `struct sockaddr_storage`, with a baked-in socklen_t. */
 struct twist__addr {
-    /* 30 bytes of 8-byte aligned storage. */
+    /* 31 bytes of 8-byte aligned storage. */
     uint64_t storage;
-    uint8_t pad[22];
+    uint8_t pad[23];
 
     /* Address size. */
-    uint16_t len;
+    uint8_t len;
 };
 
 
