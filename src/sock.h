@@ -26,9 +26,6 @@
 
 /* Socket state. */
 struct twist__sock {
-    /* The beginning of time, as far as this socket is concerned. */
-    int64_t first_tick;
-
     /* We make sure that time never goes backwards by always keeping track
      * of the previous tick value. */
     int64_t last_tick;
@@ -55,6 +52,19 @@ struct twist__sock {
     /* Environment. */
     struct twist__env env;
 };
+
+
+/* Allocate and initialize a new socket. */
+int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env);
+
+
+/* Free a socket. Fails with TWIST_EAGAIN if the socket in question has any
+ * open (as in not yet dropped) connections. */
+int twist__sock_destroy(struct twist__sock ** sockptr);
+
+
+/* Feed a clock tick to the socket. */
+int64_t twist__sock_tick(struct twist__sock * sock, int64_t now);
 
 
 #endif
