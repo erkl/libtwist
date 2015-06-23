@@ -207,12 +207,13 @@ static int less(struct twist__heap * heap, uint32_t i, uint32_t j) {
 
     /* Connections are ordered primarily by their `next_tick` fields. In case
      * of a tie, we use their local cookies to order them deterministically.
-     * All negative `next_tick` values are considered equal. */
-    if (x->next_tick < 0) {
-        if (y->next_tick >= 0)
+     * All zero or negative `next_tick` values are considered equal to each
+     * other, but greater than any positive value. */
+    if (x->next_tick <= 0) {
+        if (y->next_tick > 0)
             return 0;
     } else {
-        if (x->next_tick < y->next_tick || y->next_tick < 0)
+        if (x->next_tick < y->next_tick || y->next_tick <= 0)
             return 1;
         if (x->next_tick > y->next_tick)
             return 0;
