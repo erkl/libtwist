@@ -12,8 +12,8 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_H
-#define LIBTWINE_H
+#ifndef LIBTWIST_H
+#define LIBTWIST_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -22,55 +22,55 @@
 
 
 /* Error codes. */
-#define TWINE_OK        ( 0)
-#define TWINE_EINVAL    (-1)
-#define TWINE_ENOMEM    (-2)
-#define TWINE_EENTROPY  (-3)
-#define TWINE_EAGAIN    (-4)
+#define TWIST_OK        ( 0)
+#define TWIST_EINVAL    (-1)
+#define TWIST_ENOMEM    (-2)
+#define TWIST_EENTROPY  (-3)
+#define TWIST_EAGAIN    (-4)
 
 
 /* Opaque socket and connection handles. */
-struct twine_sock;
-struct twine_conn;
+struct twist_sock;
+struct twist_conn;
 
 
 /* TODO: Documentation. */
-int twine_create(struct twine_sock ** sockptr);
+int twist_create(struct twist_sock ** sockptr);
 
 /* TODO: Documentation. */
-int64_t twine_tick(struct twine_sock * sock, int64_t now);
+int64_t twist_tick(struct twist_sock * sock, int64_t now);
 
 /* TODO: Documentation. */
-int64_t twine_recv(struct twine_sock * sock,
+int64_t twist_recv(struct twist_sock * sock,
                    const struct sockaddr * addr, socklen_t addrlen,
                    const uint8_t * buf, size_t len, int64_t now);
 
 /* TODO: Documentation. */
-int twine_destroy(struct twine_sock ** sockptr);
+int twist_destroy(struct twist_sock ** sockptr);
 
 
 /* TODO: Documentation. */
-int twine_dial(struct twine_sock * sock, struct twine_conn ** connptr,
+int twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
                const struct sockaddr * addr, socklen_t addrlen, int64_t timeout);
 
 /* TODO: Documentation. */
-int twine_accept(struct twine_sock * sock, struct twine_conn ** connptr, int64_t timeout);
+int twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t timeout);
 
 
 /* TODO: Documentation. */
-ssize_t twine_read(struct twine_conn * conn, uint8_t * buf, size_t len);
+ssize_t twist_read(struct twist_conn * conn, uint8_t * buf, size_t len);
 
 /* TODO: Documentation. */
-ssize_t twine_write(struct twine_conn * conn, const uint8_t * buf, size_t len);
+ssize_t twist_write(struct twist_conn * conn, const uint8_t * buf, size_t len);
 
 /* TODO: Documentation. */
-int twine_flush(struct twine_conn * conn);
+int twist_flush(struct twist_conn * conn);
 
 /* TODO: Documentation. */
-int twine_close(struct twine_conn * conn);
+int twist_close(struct twist_conn * conn);
 
 /* TODO: Documentation. */
-int twine_drop(struct twine_conn ** connptr);
+int twist_drop(struct twist_conn ** connptr);
 
 
 #endif

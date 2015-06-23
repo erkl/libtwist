@@ -19,15 +19,15 @@
 
 
 /* Construct an address from a plain `sockaddr` struct. */
-void twine__addr_load(struct twine__addr * addr,
+void twist__addr_load(struct twist__addr * addr,
                       struct sockaddr * sockaddr, socklen_t socklen) {
-    memset(addr, 0, sizeof(struct twine__addr));
+    memset(addr, 0, sizeof(struct twist__addr));
     memcpy(addr, sockaddr, (size_t) socklen);
     addr->len = (uint16_t) socklen;
 }
 
 
 /* Copy the value of the address `from` into `addr`. */
-void twine__addr_copy(struct twine__addr * addr, struct twine__addr * from) {
-    memcpy(addr, from, sizeof(struct twine__addr));
+void twist__addr_copy(struct twist__addr * addr, struct twist__addr * from) {
+    memcpy(addr, from, sizeof(struct twist__addr));
 }

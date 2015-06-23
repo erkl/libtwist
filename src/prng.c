@@ -26,18 +26,18 @@
 
 
 /* Static functions. */
-static int seed(struct twine__prng * prng);
+static int seed(struct twist__prng * prng);
 
 
-/* Initialize the PRNG context. Returns TWINE_ENOMEM if a necessary memory
- * allocation fails, otherwise TWINE_OK. */
-int twine__prng_init(struct twine__prng * prng, struct twine__env * env) {
+/* Initialize the PRNG context. Returns TWIST_ENOMEM if a necessary memory
+ * allocation fails, otherwise TWIST_OK. */
+int twist__prng_init(struct twist__prng * prng, struct twist__env * env) {
     uint8_t * buf;
 
     /* Allocate the buffer. */
     buf = malloc(BUFFER_SIZE);
     if (buf == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     /* Initialize fields. */
     prng->buf = buf;
@@ -46,20 +46,20 @@ int twine__prng_init(struct twine__prng * prng, struct twine__env * env) {
     prng->reseed = 0;
     prng->env = env;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Free the PRNG context's allocated memory. */
-void twine__prng_clear(struct twine__prng * prng) {
+void twist__prng_clear(struct twist__prng * prng) {
     free(prng->buf);
 }
 
 
 /* Read `len` non-deterministic bytes into `buf`. If the PRNG's internal
  * ChaCha20 context needs to be rekeyed, and user-supplied `read_entropy`
- * function fails, the call will fail with TWINE_EENTROPY. */
-int twine__prng_read(struct twine__prng * prng, uint8_t * buf, size_t len) {
+ * function fails, the call will fail with TWIST_EENTROPY. */
+int twist__prng_read(struct twist__prng * prng, uint8_t * buf, size_t len) {
     size_t n;
     int ret;
 
@@ -69,7 +69,7 @@ int twine__prng_read(struct twine__prng * prng, uint8_t * buf, size_t len) {
             /* Is it time to rekey the ChaCha20 context? */
             if (prng->reseed == 0) {
                 ret = seed(prng);
-                if (ret != TWINE_OK)
+                if (ret != TWIST_OK)
                     return ret;
             }
 
@@ -95,23 +95,23 @@ int twine__prng_read(struct twine__prng * prng, uint8_t * buf, size_t len) {
         len -= n;
     }
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Seed a new keystream to use for random number generation. */
-static int seed(struct twine__prng * prng) {
+static int seed(struct twist__prng * prng) {
     uint8_t buf[40];
     size_t n;
 
     /* Request a 40-byte seed. */
-    n = twine__env_entropy(prng->env, buf, 40);
+    n = twist__env_entropy(prng->env, buf, 40);
     if (n != 40)
-        return TWINE_EENTROPY;
+        return TWIST_EENTROPY;
 
     /* Set up the ChaCha20 context. */
     nectar_chacha20_init(&prng->cx, buf, buf + 32);
     prng->reseed = RESEED_INTERVAL;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }

@@ -29,26 +29,26 @@
 
 
 /* Static functions. */
-static int reduce(struct twine__register * reg, uint32_t horizon, uint32_t current);
-static int resize(struct twine__register * reg, uint32_t size,
+static int reduce(struct twist__register * reg, uint32_t horizon, uint32_t current);
+static int resize(struct twist__register * reg, uint32_t size,
                   uint32_t head, uint32_t tail, uint32_t horizon);
 
 
-/* Initialize the register. Returns TWINE_ENOMEM if a necessary allocation
- * failed, otherwise TWINE_OK. */
-int twine__register_init(struct twine__register * reg, uint32_t lifetime) {
+/* Initialize the register. Returns TWIST_ENOMEM if a necessary allocation
+ * failed, otherwise TWIST_OK. */
+int twist__register_init(struct twist__register * reg, uint32_t lifetime) {
     uint32_t * offsets;
     uint32_t * bits;
 
     /* Allocate some memory for our circular arrays. */
     offsets = malloc(lifetime * sizeof(*offsets));
     if (offsets == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     bits = malloc(sizeof(*bits) * MIN_BITS_SIZE);
     if (bits == NULL) {
         free(offsets);
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
     }
 
     /* Whenever `reg->counter == 0`, all offsets should be zero. */
@@ -64,22 +64,22 @@ int twine__register_init(struct twine__register * reg, uint32_t lifetime) {
     reg->size = MIN_BITS_SIZE;
     reg->mask = MIN_BITS_SIZE - 1;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Free all heap memory managed by the register. */
-void twine__register_clear(struct twine__register * reg) {
+void twist__register_clear(struct twist__register * reg) {
     free(reg->offsets);
     free(reg->bits);
 }
 
 
-/* Generate a new token. Returns TWINE_ENOMEM if the underlying storage array
- * is full and an attempt to grow it failed, or TWINE_EAGAIN if we've already
+/* Generate a new token. Returns TWIST_ENOMEM if the underlying storage array
+ * is full and an attempt to grow it failed, or TWIST_EAGAIN if we've already
  * reached the hard limit of tokens generated per second (2,147,483,647,
- * or 2^31 - 1); otherwise TWINE_OK. */
-int twine__register_reserve(struct twine__register * reg, uint32_t token[2], int64_t now) {
+ * or 2^31 - 1); otherwise TWIST_OK. */
+int twist__register_reserve(struct twist__register * reg, uint32_t token[2], int64_t now) {
     uint32_t current, horizon;
     uint32_t head, tail;
     int ret;
@@ -97,7 +97,7 @@ int twine__register_reserve(struct twine__register * reg, uint32_t token[2], int
 
     /* Expire old tokens, potentially freeing up some room. */
     ret = reduce(reg, horizon, current);
-    if (ret != TWINE_OK)
+    if (ret != TWIST_OK)
         return ret;
 
     /* If the register is empty we can get away with doing very little. */
@@ -111,7 +111,7 @@ int twine__register_reserve(struct twine__register * reg, uint32_t token[2], int
 
     /* Make sure `reg->counter` doesn't overflow. */
     if (reg->counter == 0xffffffff - 31)
-        return TWINE_EAGAIN;
+        return TWIST_EAGAIN;
 
     /* Find the starting index of the occupied portion of `reg->bits`, and the
      * index immediately after its end. The latter also happens to be where this
@@ -122,10 +122,10 @@ int twine__register_reserve(struct twine__register * reg, uint32_t token[2], int
     /* Grow `reg->bits` if it's full. */
     if (head == tail) {
         if (reg->size == MAX_BITS_SIZE)
-            return TWINE_ENOMEM;
+            return TWIST_ENOMEM;
 
         ret = resize(reg, 2*reg->size, head, (tail > 0 ? tail : reg->size), horizon);
-        if (ret != TWINE_OK)
+        if (ret != TWIST_OK)
             return ret;
 
         /* Because the call to `resize` may have modified `reg->offsets` we
@@ -154,13 +154,13 @@ done:
     token[0] = current;
     token[1] = reg->counter++;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
-/* Claim a token, removing it from the register. Returns TWINE_EINVAL if the
- * token has expired or has already been claimed; otherwise TWINE_OK. */
-int twine__register_claim(struct twine__register * reg, const uint32_t token[2], int64_t now) {
+/* Claim a token, removing it from the register. Returns TWIST_EINVAL if the
+ * token has expired or has already been claimed; otherwise TWIST_OK. */
+int twist__register_claim(struct twist__register * reg, const uint32_t token[2], int64_t now) {
     uint32_t upper, lower;
     uint32_t bucket, index;
     uint32_t offset, bit;
@@ -174,7 +174,7 @@ int twine__register_claim(struct twine__register * reg, const uint32_t token[2],
     lower = (upper >= reg->lifetime ? upper - reg->lifetime : 0);
 
     if (!(lower <= bucket && bucket <= upper))
-        return TWINE_EINVAL;
+        return TWIST_EINVAL;
 
     /* Find the token's bit's position; if this bit is set the token has
      * already been claimed. */
@@ -182,19 +182,19 @@ int twine__register_claim(struct twine__register * reg, const uint32_t token[2],
     bit = 1 << (index & 31);
 
     if ((reg->bits[offset] & bit))
-        return TWINE_EINVAL;
+        return TWIST_EINVAL;
 
     /* Mark this token as claimed. */
     reg->bits[offset] |= bit;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Remove any expired tokens from the register, then shrink its internal storage
- * array if possible. Returns TWINE_ENOMEM if a necessary allocation failed,
- * otherwise TWINE_OK. */
-int twine__register_reduce(struct twine__register * reg, int64_t now) {
+ * array if possible. Returns TWIST_ENOMEM if a necessary allocation failed,
+ * otherwise TWIST_OK. */
+int twist__register_reduce(struct twist__register * reg, int64_t now) {
     uint32_t current, horizon;
 
     /* Find the current bucket, as well as the oldest still valid bucket. */
@@ -208,19 +208,19 @@ int twine__register_reduce(struct twine__register * reg, int64_t now) {
 
 
 /* Shrink the register's backing bitset if possible. */
-static int reduce(struct twine__register * reg, uint32_t horizon, uint32_t current) {
+static int reduce(struct twist__register * reg, uint32_t horizon, uint32_t current) {
     uint32_t head, tail;
     uint32_t size, used;
 
     /* Because tokens expire one bucket at a time, only the first call to this
      * function every second has a chance of reclaiming any space. */
     if (reg->cursor == current)
-        return TWINE_OK;
+        return TWIST_OK;
 
     /* Empty registers don't need cleaning, and neither do registers that
      * haven't existed long enough to expire any buckets. */
     if (reg->counter == 0 || horizon == 0)
-        return TWINE_OK;
+        return TWIST_OK;
 
     /* If the last bucket has expired, all of them have. */
     if (reg->cursor < horizon) {
@@ -233,7 +233,7 @@ static int reduce(struct twine__register * reg, uint32_t horizon, uint32_t curre
         if (reg->size > MIN_BITS_SIZE)
             return resize(reg, MIN_BITS_SIZE, 0, 1, horizon);
 
-        return TWINE_OK;
+        return TWIST_OK;
     }
 
     /* Find where the occupied region of `reg->bits` begins and ends. */
@@ -250,12 +250,12 @@ static int reduce(struct twine__register * reg, uint32_t horizon, uint32_t curre
     if (size != reg->size)
         return resize(reg, size, head, (tail > 0 ? tail : reg->size), horizon);
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Resize the register's underlying bitset. */
-static int resize(struct twine__register * reg, uint32_t size,
+static int resize(struct twist__register * reg, uint32_t size,
                   uint32_t head, uint32_t tail, uint32_t horizon) {
     uint32_t * bits;
     uint32_t i, j, k;
@@ -264,7 +264,7 @@ static int resize(struct twine__register * reg, uint32_t size,
     if (head < tail && tail <= size) {
         bits = realloc(reg->bits, size * sizeof(*bits));
         if (bits == NULL)
-            return TWINE_ENOMEM;
+            return TWIST_ENOMEM;
 
         goto done;
     }
@@ -272,7 +272,7 @@ static int resize(struct twine__register * reg, uint32_t size,
     /* Allocate our new array and copy the interesting parts of `reg->bits`. */
     bits = malloc(size * sizeof(*bits));
     if (bits == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     for (i = head, j = 0; i < tail; i++)
         bits[j++] = reg->bits[i & reg->mask];
@@ -297,5 +297,5 @@ done:
     reg->size = size;
     reg->mask = size - 1;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }

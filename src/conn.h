@@ -12,18 +12,18 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_CONN_H
-#define LIBTWINE_CONN_H
+#ifndef LIBTWIST_CONN_H
+#define LIBTWIST_CONN_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 #include "src/buffer.h"
 #include "src/packet.h"
 
 
 /* Connection state. */
-struct twine__conn {
+struct twist__conn {
     /* Owning socket. */
-    struct twine__sock * sock;
+    struct twist__sock * sock;
 
     /* Connection state. */
     int state;
@@ -39,27 +39,27 @@ struct twine__conn {
     uint32_t heap_index;
 
     /* Intrusive pointer for hash table chaining. */
-    struct twine__conn * chain;
+    struct twist__conn * chain;
 
     /* Buffers for outgoing and incoming data. */
-    struct twine__buffer write_buffer;
-    struct twine__buffer read_buffer;
+    struct twist__buffer write_buffer;
+    struct twist__buffer read_buffer;
 };
 
 
 /* Allocate and initialize a connection struct. */
-int64_t twine__conn_create(struct twine_conn ** connptr, struct twine_sock * sock,
+int64_t twist__conn_create(struct twist_conn ** connptr, struct twist_sock * sock,
                            uint64_t local_cookie, uint64_t remote_cookie);
 
 /* Free all memory owned by the connection struct. */
-void twine__conn_destroy(struct twine_conn ** connptr);
+void twist__conn_destroy(struct twist_conn ** connptr);
 
 
 /* Propagate a time event to the connection's state machine. */
-int64_t twine__conn_tick(struct twine_conn * conn, int64_t now);
+int64_t twist__conn_tick(struct twist_conn * conn, int64_t now);
 
 /* Feed a received packet to the connection's state machine. */
-int64_t twine__conn_recv(struct twine_conn * conn, struct twine__packet * packet, int64_t now);
+int64_t twist__conn_recv(struct twist_conn * conn, struct twist__packet * packet, int64_t now);
 
 
 #endif

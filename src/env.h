@@ -12,16 +12,16 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_ENV_H
-#define LIBTWINE_ENV_H
+#ifndef LIBTWIST_ENV_H
+#define LIBTWIST_ENV_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 #include "src/addr.h"
 
 
-/* The functions defined in the `twine__env` struct form the sole interface
+/* The functions defined in the `twist__env` struct form the sole interface
  * used by sockets to interact with the outside world. */
-struct twine__env {
+struct twist__env {
     /* User-provided function for sending UDP packets. */
     void (*send_packet)(const struct sockaddr * addr, socklen_t addrlen,
                         const uint8_t * payload, size_t len, void * priv);
@@ -37,7 +37,7 @@ struct twine__env {
 
 
 /* Send a UDP packet to `addr`. */
-static inline void twine__env_send(struct twine__env * env, const struct twine__addr * addr,
+static inline void twist__env_send(struct twist__env * env, const struct twist__addr * addr,
                                    const uint8_t * payload, size_t len) {
     env->send_packet((const struct sockaddr *) addr, (socklen_t) addr->len,
                      payload, len, env->priv);
@@ -45,7 +45,7 @@ static inline void twine__env_send(struct twine__env * env, const struct twine__
 
 
 /* Read `len` bytes of random data. */
-static inline size_t twine__env_entropy(struct twine__env * env, uint8_t * buf, size_t len) {
+static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, size_t len) {
     return env->read_entropy(buf, len, env->priv);
 }
 

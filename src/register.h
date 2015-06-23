@@ -12,22 +12,22 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_REGISTER_H
-#define LIBTWINE_REGISTER_H
+#ifndef LIBTWIST_REGISTER_H
+#define LIBTWIST_REGISTER_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
-/* The `twine__register` struct generates and validates single-use, fixed
+/* The `twist__register` struct generates and validates single-use, fixed
  * lifetime "tokens", used by sockets when verifying the remote address of a
  * connecting party. It does this rather efficiently (1 bit per token, plus
  * a small constant overhead) using a circular bitset.
  *
  * Because the generated tokens will be encrypted and signed by the socket
  * before being sent, the current register implementation doesn't verify that
- * the tokens being passed to `twine__register_claim` were in fact generated
- * by `twine__register_reserve`. */
-struct twine__register {
+ * the tokens being passed to `twist__register_claim` were in fact generated
+ * by `twist__register_reserve`. */
+struct twist__register {
     /* Circular array storing the starting offsets (in the `bits` array) for
      * the last `lifetime` buckets (a bucket being second-long intervals that
      * tokens are grouped into). */
@@ -53,28 +53,28 @@ struct twine__register {
 };
 
 
-/* Initialize the register. Returns TWINE_ENOMEM if a necessary allocation
- * failed, otherwise TWINE_OK. */
-int twine__register_init(struct twine__register * reg, uint32_t lifetime);
+/* Initialize the register. Returns TWIST_ENOMEM if a necessary allocation
+ * failed, otherwise TWIST_OK. */
+int twist__register_init(struct twist__register * reg, uint32_t lifetime);
 
 /* Free all heap memory managed by the register. */
-void twine__register_clear(struct twine__register * reg);
+void twist__register_clear(struct twist__register * reg);
 
 
-/* Generate a new token. Returns TWINE_ENOMEM if the underlying storage array
- * is full and an attempt to grow it failed, or TWINE_EAGAIN if we've already
+/* Generate a new token. Returns TWIST_ENOMEM if the underlying storage array
+ * is full and an attempt to grow it failed, or TWIST_EAGAIN if we've already
  * reached the hard limit of tokens generated per second (2,147,483,647,
- * or 2^31 - 1); otherwise TWINE_OK. */
-int twine__register_reserve(struct twine__register * reg, uint32_t token[2], int64_t now);
+ * or 2^31 - 1); otherwise TWIST_OK. */
+int twist__register_reserve(struct twist__register * reg, uint32_t token[2], int64_t now);
 
-/* Claim a token, removing it from the register. Returns TWINE_EINVAL if the
- * token has expired or has already been claimed; otherwise TWINE_OK. */
-int twine__register_claim(struct twine__register * reg, const uint32_t token[2], int64_t now);
+/* Claim a token, removing it from the register. Returns TWIST_EINVAL if the
+ * token has expired or has already been claimed; otherwise TWIST_OK. */
+int twist__register_claim(struct twist__register * reg, const uint32_t token[2], int64_t now);
 
 /* Remove any expired tokens from the register, then shrink its internal storage
- * array if possible. Returns TWINE_ENOMEM if a necessary allocation failed,
- * otherwise TWINE_OK. */
-int twine__register_reduce(struct twine__register * reg, int64_t now);
+ * array if possible. Returns TWIST_ENOMEM if a necessary allocation failed,
+ * otherwise TWIST_OK. */
+int twist__register_reduce(struct twist__register * reg, int64_t now);
 
 
 #endif

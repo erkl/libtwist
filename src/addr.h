@@ -12,19 +12,19 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_ADDR_H
-#define LIBTWINE_ADDR_H
+#ifndef LIBTWIST_ADDR_H
+#define LIBTWIST_ADDR_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
-/* Maximum number of address bytes that will fit in a `twine__addr`. */
+/* Maximum number of address bytes that will fit in a `twist__addr`. */
 #define MAX_ADDR_LEN  30
 
 
 /* This struct represents a network address. It basically functions as a much
  * smaller `struct sockaddr_storage`, with a baked-in socklen_t. */
-struct twine__addr {
+struct twist__addr {
     /* 30 bytes of 8-byte aligned storage. */
     uint64_t storage;
     uint8_t pad[22];
@@ -35,11 +35,11 @@ struct twine__addr {
 
 
 /* Construct an address from a plain `sockaddr` struct. */
-void twine__addr_load(struct twine__addr * addr,
+void twist__addr_load(struct twist__addr * addr,
                       struct sockaddr * sockaddr, socklen_t socklen);
 
 /* Copy the value of the address `from` into `addr`. */
-void twine__addr_copy(struct twine__addr * addr, struct twine__addr * from);
+void twist__addr_copy(struct twist__addr * addr, struct twist__addr * from);
 
 
 #endif

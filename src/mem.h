@@ -12,12 +12,12 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_MEM_H
-#define LIBTWINE_MEM_H
+#ifndef LIBTWIST_MEM_H
+#define LIBTWIST_MEM_H
 
 #include <stdlib.h>
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
 /* This would be where to replace the default memory management functions,

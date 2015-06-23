@@ -12,17 +12,17 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_HEAP_H
-#define LIBTWINE_HEAP_H
+#ifndef LIBTWIST_HEAP_H
+#define LIBTWIST_HEAP_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
 /* This is a simple min-heap for storing connections ordered by when their
  * next time-based event is scheduled to occur. */
-struct twine__heap {
+struct twist__heap {
     /* Underlying storage array. */
-    struct twine__conn ** entries;
+    struct twist__conn ** entries;
 
     /* Number of connections currently stored in the heap. */
     uint32_t count;
@@ -32,27 +32,27 @@ struct twine__heap {
 };
 
 
-/* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
- * allocation failed, otherwise TWINE_OK. */
-int twine__heap_init(struct twine__heap * heap);
+/* Initialize the heap structure. Returns TWIST_ENOMEM if a necessary
+ * allocation failed, otherwise TWIST_OK. */
+int twist__heap_init(struct twist__heap * heap);
 
 /* Free the heap's underlying storage. */
-void twine__heap_clear(struct twine__heap * heap);
+void twist__heap_clear(struct twist__heap * heap);
 
 
 /* Get the heap's top-most connection, or NULL if the heap is empty. */
-struct twine__conn * twine__heap_peek(struct twine__heap * heap);
+struct twist__conn * twist__heap_peek(struct twist__heap * heap);
 
 /* Push a new connection onto the heap. */
-int twine__heap_add(struct twine__heap * heap, struct twine__conn * conn);
+int twist__heap_add(struct twist__heap * heap, struct twist__conn * conn);
 
 /* Remove a connection from the heap. */
-int twine__heap_remove(struct twine__heap * heap, struct twine__conn * conn);
+int twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn);
 
 
 /* Re-establish heap ordering after a particular connection's `next_tick`
  * value has changed. */
-void twine__heap_fix(struct twine__heap * heap, struct twine__conn * conn);
+void twist__heap_fix(struct twist__heap * heap, struct twist__conn * conn);
 
 
 #endif

@@ -12,17 +12,17 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_PRNG_H
-#define LIBTWINE_PRNG_H
+#ifndef LIBTWIST_PRNG_H
+#define LIBTWIST_PRNG_H
 
 #include <nectar.h>
 
-#include "include/twine.h"
+#include "include/twist.h"
 #include "src/env.h"
 
 
 /* Generates non-deterministic bits using ChaCha20 keystreams. */
-struct twine__prng {
+struct twist__prng {
     /* ChaCha20 context. */
     struct nectar_chacha20_ctx cx;
 
@@ -42,21 +42,21 @@ struct twine__prng {
     unsigned int reseed;
 
     /* Environment. */
-    struct twine__env * env;
+    struct twist__env * env;
 };
 
 
-/* Initialize the PRNG context. Returns TWINE_ENOMEM if a necessary memory
- * allocation fails, otherwise TWINE_OK. */
-int twine__prng_init(struct twine__prng * prng, struct twine__env * env);
+/* Initialize the PRNG context. Returns TWIST_ENOMEM if a necessary memory
+ * allocation fails, otherwise TWIST_OK. */
+int twist__prng_init(struct twist__prng * prng, struct twist__env * env);
 
 /* Free the PRNG context's allocated memory. */
-void twine__prng_clear(struct twine__prng * prng);
+void twist__prng_clear(struct twist__prng * prng);
 
 /* Read `len` non-deterministic bytes into `buf`. If the PRNG's internal
  * ChaCha20 context needs to be rekeyed, and user-supplied `read_entropy`
- * function fails, the call will fail with TWINE_EENTROPY. */
-int twine__prng_read(struct twine__prng * prng, uint8_t * buf, size_t len);
+ * function fails, the call will fail with TWIST_EENTROPY. */
+int twist__prng_read(struct twist__prng * prng, uint8_t * buf, size_t len);
 
 
 #endif

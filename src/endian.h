@@ -12,10 +12,10 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_ENDIAN_H
-#define LIBTWINE_ENDIAN_H
+#ifndef LIBTWIST_ENDIAN_H
+#define LIBTWIST_ENDIAN_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
 /* Write a 24-bit integer to dst in big-endian form. */

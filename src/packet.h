@@ -12,10 +12,10 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_PACKET_H
-#define LIBTWINE_PACKET_H
+#ifndef LIBTWIST_PACKET_H
+#define LIBTWIST_PACKET_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 #include "src/addr.h"
 
 
@@ -27,9 +27,9 @@
 
 
 /* Describes an incoming or outgoing packet. */
-struct twine__packet {
+struct twist__packet {
     /* Source/destination address. */
-    struct twine__addr addr;
+    struct twist__addr addr;
 
     /* Packet payload. The payload will always be allocated immediately after
      * the packet struct header itself, but an explicit pointer is way better

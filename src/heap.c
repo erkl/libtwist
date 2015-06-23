@@ -25,56 +25,56 @@
 
 
 /* Static functions. */
-static int resize(struct twine__heap * heap, uint32_t size);
-static void up(struct twine__heap * heap, uint32_t index);
-static void down(struct twine__heap * heap, uint32_t index);
-static int less(struct twine__heap * heap, uint32_t i, uint32_t j);
-static void swap(struct twine__heap * heap, uint32_t i, uint32_t j);
+static int resize(struct twist__heap * heap, uint32_t size);
+static void up(struct twist__heap * heap, uint32_t index);
+static void down(struct twist__heap * heap, uint32_t index);
+static int less(struct twist__heap * heap, uint32_t i, uint32_t j);
+static void swap(struct twist__heap * heap, uint32_t i, uint32_t j);
 
 
-/* Initialize the heap structure. Returns TWINE_ENOMEM if a necessary
- * allocation failed, otherwise TWINE_OK. */
-int twine__heap_init(struct twine__heap * heap) {
-    struct twine__conn ** entries;
+/* Initialize the heap structure. Returns TWIST_ENOMEM if a necessary
+ * allocation failed, otherwise TWIST_OK. */
+int twist__heap_init(struct twist__heap * heap) {
+    struct twist__conn ** entries;
 
     /* Allocate the initial storage array. */
-    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twine__conn *));
+    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twist__conn *));
     if (entries == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     /* Update the heap's internal fields. */
     heap->entries = entries;
     heap->count = 0;
     heap->size = MIN_HEAP_SIZE;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Free the heap's underlying storage. */
-void twine__heap_clear(struct twine__heap * heap) {
+void twist__heap_clear(struct twist__heap * heap) {
     free(heap->entries);
 }
 
 
 /* Grab a pointer to the heap's top-most connection, or NULL if the heap
  * is empty. */
-struct twine__conn * twine__heap_peek(struct twine__heap * heap) {
+struct twist__conn * twist__heap_peek(struct twist__heap * heap) {
     return (heap->count > 0 ? heap->entries[0] : NULL);
 }
 
 
 /* Push a new connection onto the heap. */
-int twine__heap_add(struct twine__heap * heap, struct twine__conn * conn) {
+int twist__heap_add(struct twist__heap * heap, struct twist__conn * conn) {
     int ret;
 
     /* If the underlying array is already full, grow it. */
     if (heap->count == heap->size) {
         if (heap->size == MAX_HEAP_SIZE)
-            return TWINE_ENOMEM;
+            return TWIST_ENOMEM;
 
         ret = resize(heap, heap->size * 2);
-        if (ret != TWINE_OK)
+        if (ret != TWIST_OK)
             return ret;
     }
 
@@ -87,19 +87,19 @@ int twine__heap_add(struct twine__heap * heap, struct twine__conn * conn) {
     /* Restore heap ordering. */
     up(heap, conn->heap_index);
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Remove a connection from the heap. */
-int twine__heap_remove(struct twine__heap * heap, struct twine__conn * conn) {
+int twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn) {
     uint32_t index;
     int ret;
 
     /* If 25% or less of the underlying array is in use, shrink it. */
     if ((heap->count - 1) <= (heap->size / 4) && heap->count > MIN_HEAP_SIZE) {
         ret = resize(heap, heap->size / 2);
-        if (ret != TWINE_OK)
+        if (ret != TWIST_OK)
             return ret;
     }
 
@@ -112,13 +112,13 @@ int twine__heap_remove(struct twine__heap * heap, struct twine__conn * conn) {
     /* Restore heap ordering. */
     down(heap, index);
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Re-establish the heap ordering after a particular entry's `next_tick` value
  * has changed. */
-void twine__heap_fix(struct twine__heap * heap, struct twine__conn * conn) {
+void twist__heap_fix(struct twist__heap * heap, struct twist__conn * conn) {
     uint32_t index;
 
     /* Load the original index, because `conn->heap_index` may be modified
@@ -131,25 +131,25 @@ void twine__heap_fix(struct twine__heap * heap, struct twine__conn * conn) {
 
 
 /* Resize the heap's underlying storage. */
-static int resize(struct twine__heap * heap, uint32_t size) {
-    struct twine__conn ** entries;
+static int resize(struct twist__heap * heap, uint32_t size) {
+    struct twist__conn ** entries;
 
     /* Allocate new storage. */
-    entries = realloc(heap->entries, size * sizeof(struct twine__conn *));
+    entries = realloc(heap->entries, size * sizeof(struct twist__conn *));
     if (entries == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     /* Update the relevant fields. */
     heap->entries = entries;
     heap->size = size;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Select the entry at `index` and swap it continuously with its current parent
  * until the path from the heap's root to `index` is ordered again. */
-static void up(struct twine__heap * heap, uint32_t index) {
+static void up(struct twist__heap * heap, uint32_t index) {
     uint32_t parent;
 
     while (index != 0) {
@@ -167,7 +167,7 @@ static void up(struct twine__heap * heap, uint32_t index) {
 
 /* Select the entry at `index` and keep swapping it with the lesser of its
  * children until the subtree rooted at `index` is ordered again. */
-static void down(struct twine__heap * heap, uint32_t index) {
+static void down(struct twist__heap * heap, uint32_t index) {
     uint32_t left, right, child;
 
     for (;;) {
@@ -198,8 +198,8 @@ static void down(struct twine__heap * heap, uint32_t index) {
 
 /* Compare two entries in the heap. Returns a non-zero value if the entry
  * at index `i` should be put in fron of the entry at index `j`. */
-static int less(struct twine__heap * heap, uint32_t i, uint32_t j) {
-    struct twine__conn * x, * y;
+static int less(struct twist__heap * heap, uint32_t i, uint32_t j) {
+    struct twist__conn * x, * y;
 
     /* Grab the two connections. */
     x = heap->entries[i];
@@ -227,8 +227,8 @@ static int less(struct twine__heap * heap, uint32_t i, uint32_t j) {
 
 
 /* Swap the position of entries in the heap. */
-static void swap(struct twine__heap * heap, uint32_t i, uint32_t j) {
-    struct twine__conn * x, * y;
+static void swap(struct twist__heap * heap, uint32_t i, uint32_t j) {
+    struct twist__conn * x, * y;
 
     x = heap->entries[i];
     y = heap->entries[j];

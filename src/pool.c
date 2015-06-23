@@ -19,21 +19,21 @@
 
 
 /* Initialize an object pool. */
-void twine__pool_init(struct twine__pool * pool) {
+void twist__pool_init(struct twist__pool * pool) {
     pool->head = NULL;
     pool->count = 0;
 }
 
 
 /* Free all objects owned by the pool. */
-void twine__pool_clear(struct twine__pool * pool) {
-    twine__pool_cull(pool, 0);
+void twist__pool_clear(struct twist__pool * pool) {
+    twist__pool_cull(pool, 0);
 }
 
 
 /* Free all but `keep` objects from the pool. If the pool doesn't contain more
  * than `keep` objects the function call does nothing. */
-void twine__pool_cull(struct twine__pool * pool, unsigned int keep) {
+void twist__pool_cull(struct twist__pool * pool, unsigned int keep) {
     void * next;
 
     /* Free objects until only `keep` are left. */
@@ -47,7 +47,7 @@ void twine__pool_cull(struct twine__pool * pool, unsigned int keep) {
 
 
 /* Grab an object from the pool or, if the pool is empty, allocate a new one. */
-void * twine__pool_alloc(struct twine__pool * pool) {
+void * twist__pool_alloc(struct twist__pool * pool) {
     void * obj;
 
     if (pool->head != NULL) {
@@ -64,7 +64,7 @@ void * twine__pool_alloc(struct twine__pool * pool) {
 
 /* Recycle an object back into the pool. If the pool is already at capacity,
  * the object will be freed. */
-void twine__pool_free(struct twine__pool * pool, void * obj) {
+void twist__pool_free(struct twist__pool * pool, void * obj) {
     /* Doesn't hurt to be paranoid about these things. */
     if (pool->count == UINT_MAX) {
         free(obj);

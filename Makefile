@@ -7,10 +7,10 @@ OBJECTS = $(SOURCES:src/%.c=build/%.o)
 
 
 # Default make target.
-build: build/libtwine.a
+build: build/libtwist.a
 
 # Assemble the static library.
-build/libtwine.a: $(OBJECTS)
+build/libtwist.a: $(OBJECTS)
 	@printf "   AR  $@\n"
 	@$(AR) cr $@ $(OBJECTS)
 

@@ -19,7 +19,7 @@
 
 /* Maximum capacity of a slab. */
 #define BUFFER_SLAB_SIZE                                                       \
-    (POOL_OBJECT_SIZE - sizeof(struct twine__buffer_slab))
+    (POOL_OBJECT_SIZE - sizeof(struct twist__buffer_slab))
 
 
 /* Calculate the amount of trailing unused space in a slab. */
@@ -28,12 +28,12 @@
 
 
 /* Static functions. */
-struct twine__buffer_slab * alloc(struct twine__buffer * bufr, size_t len);
-size_t append(struct twine__buffer_slab * slab, const uint8_t * buf, size_t len);
+struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t len);
+size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len);
 
 
 /* Initialize the buffer's internal fields. */
-void twine__buffer_init(struct twine__buffer * bufr, struct twine__pool * pool) {
+void twist__buffer_init(struct twist__buffer * bufr, struct twist__pool * pool) {
     bufr->head = NULL;
     bufr->tail = NULL;
     bufr->size = 0;
@@ -42,8 +42,8 @@ void twine__buffer_init(struct twine__buffer * bufr, struct twine__pool * pool) 
 
 
 /* Discard all data and return the buffer's slabs to the object pool. */
-void twine__buffer_clear(struct twine__buffer * bufr) {
-    struct twine__buffer_slab * first, * curr, * next;
+void twist__buffer_clear(struct twist__buffer * bufr) {
+    struct twist__buffer_slab * first, * curr, * next;
 
     /* If the buffer is already empty, do nothing. */
     if (bufr->head == NULL)
@@ -55,7 +55,7 @@ void twine__buffer_clear(struct twine__buffer * bufr) {
 
     do {
         next = curr->next;
-        twine__pool_free(bufr->pool, curr);
+        twist__pool_free(bufr->pool, curr);
         curr = next;
     } while (curr != first);
 
@@ -66,11 +66,11 @@ void twine__buffer_clear(struct twine__buffer * bufr) {
 
 
 /* Write a chunk of data to the buffer. Unless a necessary memory allocation
- * fails (in which case no data is written and TWINE_ENOMEM is returned), the
+ * fails (in which case no data is written and TWIST_ENOMEM is returned), the
  * full write is guaranteed to complete successfully. The `len` argument must
  * not be greater than SSIZE_MAX. */
-ssize_t twine__buffer_write(struct twine__buffer * bufr, const uint8_t * buf, size_t len) {
-    struct twine__buffer_slab * added;
+ssize_t twist__buffer_write(struct twist__buffer * bufr, const uint8_t * buf, size_t len) {
+    struct twist__buffer_slab * added;
     size_t cap, rem, n;
 
     /* Bail early with no input. */
@@ -85,7 +85,7 @@ ssize_t twine__buffer_write(struct twine__buffer * bufr, const uint8_t * buf, si
     if (cap < len) {
         added = alloc(bufr, len - cap);
         if (added == NULL)
-            return TWINE_ENOMEM;
+            return TWIST_ENOMEM;
 
         if (bufr->head == NULL) {
             bufr->head = added;
@@ -123,8 +123,8 @@ ssize_t twine__buffer_write(struct twine__buffer * bufr, const uint8_t * buf, si
 
 /* Read data from the buffer. This call can't fail, only return 0 when the
  * buffer is empty. The `len` argument must not be greater than SSIZE_MAX. */
-ssize_t twine__buffer_read(struct twine__buffer * bufr, uint8_t * buf, size_t len) {
-    struct twine__buffer_slab * slab;
+ssize_t twist__buffer_read(struct twist__buffer * bufr, uint8_t * buf, size_t len) {
+    struct twist__buffer_slab * slab;
     ssize_t nread, n;
 
     /* Initialize the counter. */
@@ -152,7 +152,7 @@ ssize_t twine__buffer_read(struct twine__buffer * bufr, uint8_t * buf, size_t le
                 bufr->tail = NULL;
             }
 
-            twine__pool_free(bufr->pool, slab);
+            twist__pool_free(bufr->pool, slab);
         }
 
         /* Update counters. */
@@ -168,24 +168,24 @@ ssize_t twine__buffer_read(struct twine__buffer * bufr, uint8_t * buf, size_t le
 
 
 /* Get the number of bytes of data currently stored in the buffer. */
-size_t twine__buffer_size(struct twine__buffer * bufr) {
+size_t twist__buffer_size(struct twist__buffer * bufr) {
     return bufr->size;
 }
 
 
 /* Allocate enough slabs to fit `cap` bytes of data. Returns the first item of
  * a singly linked list of slabs on success, or NULL if an allocation failed. */
-struct twine__buffer_slab * alloc(struct twine__buffer * bufr, size_t cap) {
-    struct twine__buffer_slab * head, * next;
+struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t cap) {
+    struct twist__buffer_slab * head, * next;
 
     /* Request one slab from the pool at a time. */
     for (;;) {
-        next = twine__pool_alloc(bufr->pool);
+        next = twist__pool_alloc(bufr->pool);
         if (next == NULL)
             goto err;
 
         /* Initialize the empty slab and prepend it to the linked list. */
-        next->start = ((uint8_t *) next) + sizeof(struct twine__buffer_slab);
+        next->start = ((uint8_t *) next) + sizeof(struct twist__buffer_slab);
         next->end = next->start;
 
         next->next = head;
@@ -205,7 +205,7 @@ struct twine__buffer_slab * alloc(struct twine__buffer * bufr, size_t cap) {
 err:
     while (head != NULL) {
         next = head->next;
-        twine__pool_free(bufr->pool, head);
+        twist__pool_free(bufr->pool, head);
         head = next;
     }
 
@@ -214,7 +214,7 @@ err:
 
 
 /* Append up to `len` bytes of data to a slab. */
-size_t append(struct twine__buffer_slab * slab, const uint8_t * buf, size_t len) {
+size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len) {
     size_t n = UNUSED(slab);
     if (n > len)
         n = len;

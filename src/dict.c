@@ -26,29 +26,29 @@
 
 
 /* Static functions. */
-static int maybe_resize(struct twine__dict * dict, int delta);
-static void migrate_bucket(struct twine__dict * dict, uint32_t index);
-static void migrate_buckets(struct twine__dict * dict, int num);
-static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
-                              struct twine__dict_table ** table);
+static int maybe_resize(struct twist__dict * dict, int delta);
+static void migrate_bucket(struct twist__dict * dict, uint32_t index);
+static void migrate_buckets(struct twist__dict * dict, int num);
+static uint32_t locate_bucket(struct twist__dict * dict, uint64_t cookie,
+                              struct twist__dict_table ** table);
 
 
 /* Initialize a dict instance. The call returns zero or success, or
- * TWINE_ENOMEM if a necessary allocation failed. */
-int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]) {
-    struct twine__conn ** buckets;
+ * TWIST_ENOMEM if a necessary allocation failed. */
+int twist__dict_init(struct twist__dict * dict, uint8_t seed[16]) {
+    struct twist__conn ** buckets;
     int i;
 
     /* Allocate the initial array of hash buckets. */
-    buckets = malloc(MIN_TABLE_SIZE * sizeof(struct twine__conn *));
+    buckets = malloc(MIN_TABLE_SIZE * sizeof(struct twist__conn *));
     if (buckets == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     for (i = 0; i < MIN_TABLE_SIZE; i++)
         buckets[i] = NULL;
 
     /* Initialize the dict instance. */
-    dict->tables[0] = (struct twine__dict_table) {
+    dict->tables[0] = (struct twist__dict_table) {
         .buckets = buckets,
         .size = MIN_TABLE_SIZE,
         .mask = MIN_TABLE_SIZE - 1,
@@ -61,12 +61,12 @@ int twine__dict_init(struct twine__dict * dict, uint8_t seed[16]) {
     for (i = 0; i < 16; i++)
         dict->seed[i] = seed[i];
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Free the dict's internal hash table(s). */
-void twine__dict_clear(struct twine__dict * dict) {
+void twist__dict_clear(struct twist__dict * dict) {
     free(dict->tables[0].buckets);
 
     /* If we've created a second hash table, free its storage too. */
@@ -77,9 +77,9 @@ void twine__dict_clear(struct twine__dict * dict) {
 
 /* Look up a connection in the dict by its local connection cookie. The
  * returned pointer will be NULL if no matching entry could be found. */
-struct twine__conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie) {
-    struct twine__dict_table * table;
-    struct twine__conn * conn;
+struct twist__conn * twist__dict_find(struct twist__dict * dict, uint64_t cookie) {
+    struct twist__dict_table * table;
+    struct twist__conn * conn;
     uint32_t index;
 
     /* If we're resizing the underlying hash table, move some buckets. */
@@ -98,14 +98,14 @@ struct twine__conn * twine__dict_find(struct twine__dict * dict, uint64_t cookie
 
 
 /* Add a connection entry to the dict. The call will return zero on success,
- * or TWINE_ENOMEM if the dict is large enough that the underlying hash table
+ * or TWIST_ENOMEM if the dict is large enough that the underlying hash table
  * should be resized but the allocation failed.
  *
  * The implementation makes the assumption that local connection cookies are
  * unique, and that the same connection won't be inserted twice. */
-int twine__dict_add(struct twine__dict * dict, struct twine__conn * conn) {
-    struct twine__dict_table * table;
-    struct twine__conn * head;
+int twist__dict_add(struct twist__dict * dict, struct twist__conn * conn) {
+    struct twist__dict_table * table;
+    struct twist__conn * head;
     uint32_t index;
     int ret;
 
@@ -130,14 +130,14 @@ int twine__dict_add(struct twine__dict * dict, struct twine__conn * conn) {
     /* Update the entry count. */
     dict->count++;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Remove a connection entry from the dict. */
-int twine__dict_remove(struct twine__dict * dict, struct twine__conn * conn) {
-    struct twine__dict_table * table;
-    struct twine__conn ** prev;
+int twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn) {
+    struct twist__dict_table * table;
+    struct twist__conn ** prev;
     uint64_t cookie;
     uint32_t index;
     int ret;
@@ -173,14 +173,14 @@ int twine__dict_remove(struct twine__dict * dict, struct twine__conn * conn) {
         prev = &conn->chain;
     }
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Shrink or grow the dict's underlying hash table if utilization is too high
  * or too low. */
-static int maybe_resize(struct twine__dict * dict, int delta) {
-    struct twine__conn ** buckets;
+static int maybe_resize(struct twist__dict * dict, int delta) {
+    struct twist__conn ** buckets;
     uint64_t count;
     uint32_t size;
     uint32_t i;
@@ -196,18 +196,18 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
     else if (delta < 0 && size > MIN_TABLE_SIZE && count <= (uint64_t) (size / 4))
         size >>= 1;
     else
-        return TWINE_OK;
+        return TWIST_OK;
 
     /* Allocate the underlying storage for our new hash table. */
-    buckets = malloc(size * sizeof(struct twine__conn *));
+    buckets = malloc(size * sizeof(struct twist__conn *));
     if (buckets == NULL)
-        return TWINE_ENOMEM;
+        return TWIST_ENOMEM;
 
     for (i = 0; i < size; i++)
         buckets[i] = NULL;
 
     /* Initialize the spare table. */
-    dict->tables[1] = (struct twine__dict_table) {
+    dict->tables[1] = (struct twist__dict_table) {
         .buckets = buckets,
         .size = size,
         .mask = size - 1,
@@ -218,14 +218,14 @@ static int maybe_resize(struct twine__dict * dict, int delta) {
     migrate_bucket(dict, 0);
     dict->split = 1;
 
-    return TWINE_OK;
+    return TWIST_OK;
 }
 
 
 /* Move all entries from a bucket in the current hash table to their new
  * positions in the new hash table. */
-static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
-    struct twine__conn * conn, * next;
+static void migrate_bucket(struct twist__dict * dict, uint32_t index) {
+    struct twist__conn * conn, * next;
     uint32_t key;
 
     /* Grab the first entry, then clear the bucket. */
@@ -252,7 +252,7 @@ static void migrate_bucket(struct twine__dict * dict, uint32_t index) {
 /* Move `num` buckets from the current hash table to the next. This function
  * allows us to amortize the cost of resizing hash tables over many read or
  * write operations. */
-static void migrate_buckets(struct twine__dict * dict, int num) {
+static void migrate_buckets(struct twist__dict * dict, int num) {
     int i;
 
     /* Move up to `num` buckets to the resized hash table. */
@@ -275,8 +275,8 @@ static void migrate_buckets(struct twine__dict * dict, int num) {
 
 /* Determine which hash table bucket a particular connection cookie maps to.
  * The hash table's address will be stored in the `table` pointer. */
-static uint32_t locate_bucket(struct twine__dict * dict, uint64_t cookie,
-                              struct twine__dict_table ** table) {
+static uint32_t locate_bucket(struct twist__dict * dict, uint64_t cookie,
+                              struct twist__dict_table ** table) {
     uint32_t key, index;
 
     /* Find the relevant bucket in the main hash table. */

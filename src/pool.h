@@ -12,22 +12,22 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_POOL_H
-#define LIBTWINE_POOL_H
+#ifndef LIBTWIST_POOL_H
+#define LIBTWIST_POOL_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 
 
 /* Fixed size of pooled objects. This must be greater than MAX_PACKET_SIZE +
- * sizeof(struct twine__packet), and rounding it up to 2^10 + 2^9 should make
+ * sizeof(struct twist__packet), and rounding it up to 2^10 + 2^9 should make
  * the `malloc` implementation's life a little bit easier. */
 #define POOL_OBJECT_SIZE  1536
 
 
-/* The `twine__pool` struct implements a simple last-in-first-out pool of
+/* The `twist__pool` struct implements a simple last-in-first-out pool of
  * fixed-size blocks of memory. It doesn't free any objects on its own accord,
- * instead the user is expected to use `twine__pool_cull`. */
-struct twine__pool {
+ * instead the user is expected to use `twist__pool_cull`. */
+struct twist__pool {
     /* Linked list of free objects. */
     void * head;
 
@@ -37,22 +37,22 @@ struct twine__pool {
 
 
 /* Initialize an object pool. */
-void twine__pool_init(struct twine__pool * pool);
+void twist__pool_init(struct twist__pool * pool);
 
 /* Free all objects owned by the pool. */
-void twine__pool_clear(struct twine__pool * pool);
+void twist__pool_clear(struct twist__pool * pool);
 
 
 /* Free all but `keep` objects from the pool. If there are already fewer than
  * `keep + 1` objects in the pool the function call does nothing. */
-void twine__pool_cull(struct twine__pool * pool, unsigned int keep);
+void twist__pool_cull(struct twist__pool * pool, unsigned int keep);
 
 /* Grab an object from the pool or, if the pool is empty, allocate a new one. */
-void * twine__pool_alloc(struct twine__pool * pool);
+void * twist__pool_alloc(struct twist__pool * pool);
 
 /* Recycle an object back into the pool. If the pool is already at capacity,
  * the object will be freed. */
-void twine__pool_free(struct twine__pool * pool, void * obj);
+void twist__pool_free(struct twist__pool * pool, void * obj);
 
 
 #endif

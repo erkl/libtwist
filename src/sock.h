@@ -12,10 +12,10 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
-#ifndef LIBTWINE_SOCK_H
-#define LIBTWINE_SOCK_H
+#ifndef LIBTWIST_SOCK_H
+#define LIBTWIST_SOCK_H
 
-#include "include/twine.h"
+#include "include/twist.h"
 #include "src/dict.h"
 #include "src/env.h"
 #include "src/heap.h"
@@ -25,7 +25,7 @@
 
 
 /* Socket state. */
-struct twine__sock {
+struct twist__sock {
     /* The beginning of time, as far as this socket is concerned. */
     int64_t first_tick;
 
@@ -34,26 +34,26 @@ struct twine__sock {
     int64_t last_tick;
 
     /* This field holds the next clock tick which will affect a connection's
-     * state. Essentially a shortcut for `twine__heap_peek(heap)->next_tick`. */
+     * state. Essentially a shortcut for `twist__heap_peek(heap)->next_tick`. */
     int64_t next_tick;
 
     /* Connections ordered by their `next_tick` values. */
-    struct twine__heap heap;
+    struct twist__heap heap;
 
     /* Hash table of connections keyed by their local cookies. */
-    struct twine__dict dict;
+    struct twist__dict dict;
 
     /* Strike-register for source address tokens. */
-    struct twine__register reg;
+    struct twist__register reg;
 
     /* Shared memory pool. */
-    struct twine__pool pool;
+    struct twist__pool pool;
 
     /* Socket-wide psuedo-random number generator. */
-    struct twine__prng prng;
+    struct twist__prng prng;
 
     /* Environment. */
-    struct twine__env env;
+    struct twist__env env;
 };
 
 
