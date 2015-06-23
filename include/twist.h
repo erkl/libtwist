@@ -54,10 +54,10 @@ int twist_destroy(struct twist_sock ** sockptr);
 
 /* TODO: Documentation. */
 int twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
-               const struct sockaddr * addr, socklen_t addrlen, int64_t timeout);
+               const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 /* TODO: Documentation. */
-int twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t timeout);
+int twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t now);
 
 
 /* TODO: Documentation. */
