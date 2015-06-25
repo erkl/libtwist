@@ -51,12 +51,18 @@ static inline void twist__packet_init(struct twist__packet * pkt,
 
     /* Use the space after the `struct twist__packet` fields to store the
      * packet's payload. This relies on the assumption that `pkt` is an object
-     * managed by a `twist__pool`. */
-    base = ((uint8_t *) pkt) + sizeof(struct twist__packet);
-    memcpy(base, payload, len);
+     * managed by a `twist__pool`.
+     *
+     * The incantations below calculate the location of the first byte
+     * immediately after the packet struct itself, then rounds that address
+     * up to the nearest multiple of 8. */
+    base = (uint8_t *) (((uintptr_t) (pkt + 1) + 7) & ~((uintptr_t) 7));
 
-    /* Store the address, and the payload base and length. */
+    /* Store the address. */
     twist__addr_load(&pkt->addr, addr, addrlen);
+
+    /* Copy the payload. */
+    memcpy(base, payload, len);
 
     pkt->payload = base;
     pkt->len = len;
