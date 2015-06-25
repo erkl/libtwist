@@ -17,6 +17,7 @@
 
 #include "include/twist.h"
 #include "src/addr.h"
+#include "src/packet.h"
 
 
 /* The functions defined in the `twist__env` struct form the sole interface
@@ -43,10 +44,9 @@ static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, 
 
 
 /* Send a UDP packet to `addr`. */
-static inline int twist__env_send(struct twist__env * env, const struct twist__addr * addr,
-                                  const uint8_t * payload, size_t len) {
-    int ret = env->send_packet((const struct sockaddr *) addr, (socklen_t) addr->len,
-                               payload, len, env->priv);
+static inline int twist__env_send(struct twist__env * env, const struct twist__packet * pkt) {
+    int ret = env->send_packet((const struct sockaddr *) &pkt->addr, (socklen_t) pkt->addr.len,
+                               pkt->payload, pkt->len, env->priv);
     return (ret != 0 ? TWIST_ETRANSMIT : 0);
 }
 
