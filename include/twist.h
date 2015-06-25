@@ -22,14 +22,12 @@
 
 
 /* Status codes. */
-#define TWIST_OK         ( 0)
-
-#define TWIST_EINVAL     (-1)
-#define TWIST_ENOMEM     (-2)
-#define TWIST_EAGAIN     (-3)
-
-#define TWIST_EENTROPY   (-4)
-#define TWIST_ETRANSMIT  (-5)
+#define TWIST_OK      ( 0)
+#define TWIST_EINVAL  (-1)
+#define TWIST_ENOMEM  (-2)
+#define TWIST_EAGAIN  (-3)
+#define TWIST_EENTPY  (-4)
+#define TWIST_ETRANS  (-5)
 
 
 /* Opaque socket and connection handles. */

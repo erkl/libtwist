@@ -47,7 +47,7 @@ static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, 
 static inline int twist__env_send(struct twist__env * env, const struct twist__packet * pkt) {
     int ret = env->send_packet((const struct sockaddr *) &pkt->addr, (socklen_t) pkt->addr.len,
                                pkt->payload, pkt->len, env->priv);
-    return (ret != 0 ? TWIST_ETRANSMIT : 0);
+    return (ret != 0 ? TWIST_ETRANS : 0);
 }
 
 
