@@ -16,6 +16,10 @@
 #include "src/sock.h"
 
 
+/* Static functions. */
+static int64_t tick(struct twist__sock * sock, int64_t now);
+
+
 /* Allocate and initialize a new socket. */
 int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     struct twist__sock * sock;
@@ -112,36 +116,58 @@ int twist__sock_destroy(struct twist__sock ** sockptr) {
 
 /* Feed a clock tick to the socket. */
 int64_t twist__sock_tick(struct twist__sock * sock, int64_t now) {
-    struct twist__conn * conn;
     int64_t ret;
 
     /* Time travel is strictly forbidden. */
     if (now < sock->last_tick)
         return TWIST_EINVAL;
 
-    /* Exit early if this tick occurred "too early". */
+    /* Let the `tick` function do its job. It was separated out because while
+     * the function for receiving packets also needs to process ticks, we don't
+     * want to cull the object pool twice. */
+    ret = tick(sock, now);
+
+    /* Cull excess objects from the object pool.
+     *
+     * TODO: Give the user an opportunity to specify how many objects to keep
+     *       in the pool. Eight feels like a reasonable number for now. */
+    twist__pool_cull(&sock->pool, 8);
+
+    return ret;
+}
+
+
+/* Feed a clock tick to the socket (inner). */
+static int64_t tick(struct twist__sock * sock, int64_t now) {
+    struct twist__conn * conn;
+    int64_t ret;
+
+    /* Exit early if this tick occurred before the next timer is set to expire,
+     * or if there simply aren't any pending timers. */
     if (now < sock->next_tick || sock->next_tick <= 0)
-        return sock->next_tick;
+        goto discard;
 
     /* Propagate this tick to all relevant connections. */
     for (;;) {
         conn = twist__heap_peek(&sock->heap);
 
-        /* We're done once we either find ourselves with no connections on the
-         * socket, or when all connections have `next_tick` values greater than
-         * the current time. */
+        /* The heap is only empty when there aren't any open connections on the
+         * socket, which means there can't be any pending timers. */
         if (conn == NULL) {
-            ret = 0;
+            sock->next_tick = 0;
             break;
-        } else if (conn->next_tick > now) {
-            ret = conn->next_tick;
+        }
+
+        /* If the next timer isn't due to expire yet, stop. */
+        if (conn->next_tick > now) {
+            sock->next_tick = conn->next_tick;
             break;
         }
 
         /* Forward the tick to the next connection. */
         ret = twist__conn_tick(conn, now);
         if (ret < 0)
-            goto cull;
+            return ret;
 
         /* Make sure the connection's `next_tick` value is up to date,
          * and that the socket's connection heap is ordered. */
@@ -151,17 +177,9 @@ int64_t twist__sock_tick(struct twist__sock * sock, int64_t now) {
         }
     }
 
-    /* Update the socket's tick values (Note that we only get here if all
-     * `twist__conn_tick` calls went fine. */
+    /* Everything went fine - store this tick. */
     sock->last_tick = now;
-    sock->next_tick = ret;
 
-cull:
-    /* Cull excess objects from the object pool.
-     *
-     * TODO: Give the user an opportunity to specify how many objects to keep
-     *       in the pool. Eight feels like a reasonable number for now. */
-    twist__pool_cull(&sock->pool, 8);
-
-    return ret;
+discard:
+    return sock->next_tick;
 }
