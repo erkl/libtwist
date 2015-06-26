@@ -40,6 +40,9 @@ struct twist__packet {
 
     /* Packet payload size. */
     size_t len;
+
+    /* Next packet in a linked list. */
+    struct twist__packet * next;
 };
 
 
@@ -66,6 +69,9 @@ static inline void twist__packet_init(struct twist__packet * pkt,
 
     pkt->payload = base;
     pkt->len = len;
+
+    /* Initialize the list pointer. */
+    pkt->next = NULL;
 }
 
 
