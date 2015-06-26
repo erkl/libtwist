@@ -12,6 +12,8 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
+#include <nectar.h>
+
 #include "src/endian.h"
 #include "src/env.h"
 #include "src/mem.h"
@@ -30,6 +32,11 @@ static int64_t receive_token_request(struct twist__sock * sock,
 static int64_t receive_client_handshake(struct twist__sock * sock,
                                         const struct sockaddr * addr, socklen_t addrlen,
                                         const uint8_t * payload, size_t len, int64_t now);
+
+static int generate_token(struct twist__sock * sock, uint8_t dst[64],
+                          const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+static int validate_token(struct twist__sock * sock, uint8_t src[64],
+                          const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 
 /* Allocate and initialize a new socket. */
@@ -330,4 +337,67 @@ static int64_t receive_client_handshake(struct twist__sock * sock,
                                         const uint8_t * payload, size_t len, int64_t now) {
     /* TODO: Everything. */
     return sock->next_tick;
+}
+
+
+/* Generate a source address token. */
+static int generate_token(struct twist__sock * sock, uint8_t dst[64],
+                          const struct sockaddr * addr, socklen_t addrlen, int64_t now) {
+    struct nectar_chacha20_ctx chacha;
+    struct nectar_hmac_sha512_ctx hmac;
+    uint8_t key[32];
+    int ret;
+
+    /* Grab a 192-bit initialization vector. */
+    ret = twist__prng_read(&sock->prng, dst, 24);
+    if (ret != TWIST_OK)
+        return ret;
+
+    /* Ask the strike register for a fresh token id. */
+    ret = twist__register_reserve(&sock->reg, (uint32_t *) (dst + 24), now);
+    if (ret != TWIST_OK)
+        return ret;
+
+    /* Encrypt the token id. */
+    nectar_hchacha20(key, sock->token_key, dst);
+    nectar_chacha20_init(&chacha, key, dst + 16);
+    nectar_chacha20_xor(&chacha, dst + 24, dst + 24, 8);
+
+    /* Sign the token. */
+    nectar_hmac_sha512_init(&hmac, sock->token_key, 32);
+    nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, (size_t) addrlen);
+    nectar_hmac_sha512_update(&hmac, dst, 32);
+    nectar_hmac_sha512_final(&hmac, dst + 32, 32);
+
+    return TWIST_OK;
+}
+
+
+/* Validate a source address token. */
+static int validate_token(struct twist__sock * sock, uint8_t src[64],
+                          const struct sockaddr * addr, socklen_t addrlen, int64_t now) {
+    struct nectar_chacha20_ctx chacha;
+    struct nectar_hmac_sha512_ctx hmac;
+    uint8_t digest[32];
+    uint8_t key[32];
+
+    /* Calculate the expected HMAC-SHA512 digest. */
+    nectar_hmac_sha512_init(&hmac, sock->token_key, 32);
+    nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, addrlen);
+    nectar_hmac_sha512_update(&hmac, src, 32);
+    nectar_hmac_sha512_final(&hmac, digest, 32);
+
+    /* Validate the digest. The constant-time comparison here isn't strictly
+     * necessary (as we don't send any feedback on invalid tokens), but it
+     * can't hurt. */
+    if (nectar_bcmp(src + 32, digest, 32) != 0)
+        return TWIST_EINVAL;
+
+    /* Decrypt the 64-bit token id. */
+    nectar_hchacha20(key, sock->token_key, src);
+    nectar_chacha20_init(&chacha, key, src + 16);
+    nectar_chacha20_xor(&chacha, src + 24, src + 24, 8);
+
+    /* Try to claim the token. */
+    return twist__register_claim(&sock->reg, (uint32_t *) (src + 24), now);
 }
