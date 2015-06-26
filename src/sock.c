@@ -13,6 +13,7 @@
  * PERFORMANCE OF THIS SOFTWARE. */
 
 #include "src/endian.h"
+#include "src/env.h"
 #include "src/mem.h"
 #include "src/sock.h"
 
@@ -74,6 +75,11 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     if (ret != TWIST_OK)
         goto err4;
 
+    /* Generate the source address token key. */
+    ret = twist__env_entropy(&sock->env, sock->token_key, 32);
+    if (ret != TWIST_OK)
+        goto err5;
+
     /* Set all other internal fields. */
     sock->last_tick = 0;
     sock->next_tick = 0;
@@ -83,6 +89,8 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     return TWIST_OK;
 
     /* Error handling. */
+err5:
+    twist__heap_clear(&sock->heap);
 err4:
     twist__dict_clear(&sock->dict);
 err3:

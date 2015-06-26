@@ -34,6 +34,9 @@ struct twist__sock {
      * state. Essentially a shortcut for `twist__heap_peek(heap)->next_tick`. */
     int64_t next_tick;
 
+    /* Key used for encrypting and signing source address tokens. */
+    uint8_t token_key[32];
+
     /* Connections ordered by their `next_tick` values. */
     struct twist__heap heap;
 
