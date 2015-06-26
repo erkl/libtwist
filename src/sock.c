@@ -40,10 +40,8 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     /* Initialize the packet pool. */
     twist__pool_init(&sock->pool);
 
-    /* Initialize the token register.
-     *
-     * TODO: The token lifetime value should be configurable. */
-    ret = twist__register_init(&sock->reg, 20);
+    /* Initialize the token register. */
+    ret = twist__register_init(&sock->reg, 60);
     if (ret != TWIST_OK)
         goto err2;
 
