@@ -41,13 +41,13 @@ int twist__register_init(struct twist__register * reg, uint32_t lifetime) {
     uint32_t * bits;
 
     /* Allocate some memory for our circular arrays. */
-    offsets = malloc(lifetime * sizeof(*offsets));
+    offsets = twist__malloc(lifetime * sizeof(*offsets));
     if (offsets == NULL)
         return TWIST_ENOMEM;
 
-    bits = malloc(sizeof(*bits) * MIN_BITS_SIZE);
+    bits = twist__malloc(sizeof(*bits) * MIN_BITS_SIZE);
     if (bits == NULL) {
-        free(offsets);
+        twist__free(offsets);
         return TWIST_ENOMEM;
     }
 
@@ -70,8 +70,8 @@ int twist__register_init(struct twist__register * reg, uint32_t lifetime) {
 
 /* Free all heap memory managed by the register. */
 void twist__register_clear(struct twist__register * reg) {
-    free(reg->offsets);
-    free(reg->bits);
+    twist__free(reg->offsets);
+    twist__free(reg->bits);
 }
 
 
@@ -262,7 +262,7 @@ static int resize(struct twist__register * reg, uint32_t size,
 
     /* Use `realloc` when possible to simply truncate or extend the array. */
     if (head < tail && tail <= size) {
-        bits = realloc(reg->bits, size * sizeof(*bits));
+        bits = twist__realloc(reg->bits, size * sizeof(*bits));
         if (bits == NULL)
             return TWIST_ENOMEM;
 
@@ -270,7 +270,7 @@ static int resize(struct twist__register * reg, uint32_t size,
     }
 
     /* Allocate our new array and copy the interesting parts of `reg->bits`. */
-    bits = malloc(size * sizeof(*bits));
+    bits = twist__malloc(size * sizeof(*bits));
     if (bits == NULL)
         return TWIST_ENOMEM;
 
@@ -289,7 +289,7 @@ static int resize(struct twist__register * reg, uint32_t size,
     }
 
     /* Free the old array. */
-    free(reg->bits);
+    twist__free(reg->bits);
 
     /* Store the new array. */
 done:

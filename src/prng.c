@@ -35,7 +35,7 @@ int twist__prng_init(struct twist__prng * prng, struct twist__env * env) {
     uint8_t * buf;
 
     /* Allocate the buffer. */
-    buf = malloc(BUFFER_SIZE);
+    buf = twist__malloc(BUFFER_SIZE);
     if (buf == NULL)
         return TWIST_ENOMEM;
 
@@ -52,7 +52,7 @@ int twist__prng_init(struct twist__prng * prng, struct twist__env * env) {
 
 /* Free the PRNG context's allocated memory. */
 void twist__prng_clear(struct twist__prng * prng) {
-    free(prng->buf);
+    twist__free(prng->buf);
 }
 
 

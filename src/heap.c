@@ -38,7 +38,7 @@ int twist__heap_init(struct twist__heap * heap) {
     struct twist__conn ** entries;
 
     /* Allocate the initial storage array. */
-    entries = malloc(MIN_HEAP_SIZE * sizeof(struct twist__conn *));
+    entries = twist__malloc(MIN_HEAP_SIZE * sizeof(struct twist__conn *));
     if (entries == NULL)
         return TWIST_ENOMEM;
 
@@ -53,7 +53,7 @@ int twist__heap_init(struct twist__heap * heap) {
 
 /* Free the heap's underlying storage. */
 void twist__heap_clear(struct twist__heap * heap) {
-    free(heap->entries);
+    twist__free(heap->entries);
 }
 
 
@@ -135,7 +135,7 @@ static int resize(struct twist__heap * heap, uint32_t size) {
     struct twist__conn ** entries;
 
     /* Allocate new storage. */
-    entries = realloc(heap->entries, size * sizeof(struct twist__conn *));
+    entries = twist__realloc(heap->entries, size * sizeof(struct twist__conn *));
     if (entries == NULL)
         return TWIST_ENOMEM;
 

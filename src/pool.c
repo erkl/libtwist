@@ -40,7 +40,7 @@ void * twist__pool_alloc(struct twist__pool * pool) {
         pool->head = *((void **) obj);
         pool->count--;
     } else {
-        obj = malloc(POOL_OBJECT_SIZE);
+        obj = twist__malloc(POOL_OBJECT_SIZE);
     }
 
     return obj;
@@ -52,7 +52,7 @@ void * twist__pool_alloc(struct twist__pool * pool) {
 void twist__pool_free(struct twist__pool * pool, void * obj) {
     /* Doesn't hurt to be paranoid about these things. */
     if (pool->count == UINT_MAX) {
-        free(obj);
+        twist__free(obj);
         return;
     }
 
@@ -73,7 +73,7 @@ void twist__pool_cull(struct twist__pool * pool, unsigned int keep) {
     /* Free objects until only `keep` are left. */
     while (pool->count > keep) {
         next = *((void **) pool->head);
-        free(pool->head);
+        twist__free(pool->head);
         pool->head = next;
         pool->count--;
     }

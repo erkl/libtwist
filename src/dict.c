@@ -40,7 +40,7 @@ int twist__dict_init(struct twist__dict * dict, uint8_t seed[16]) {
     int i;
 
     /* Allocate the initial array of hash buckets. */
-    buckets = malloc(MIN_TABLE_SIZE * sizeof(struct twist__conn *));
+    buckets = twist__malloc(MIN_TABLE_SIZE * sizeof(struct twist__conn *));
     if (buckets == NULL)
         return TWIST_ENOMEM;
 
@@ -67,11 +67,11 @@ int twist__dict_init(struct twist__dict * dict, uint8_t seed[16]) {
 
 /* Free the dict's internal hash table(s). */
 void twist__dict_clear(struct twist__dict * dict) {
-    free(dict->tables[0].buckets);
+    twist__free(dict->tables[0].buckets);
 
     /* If we've created a second hash table, free its storage too. */
     if (dict->split > 0)
-        free(dict->tables[1].buckets);
+        twist__free(dict->tables[1].buckets);
 }
 
 
@@ -199,7 +199,7 @@ static int maybe_resize(struct twist__dict * dict, int delta) {
         return TWIST_OK;
 
     /* Allocate the underlying storage for our new hash table. */
-    buckets = malloc(size * sizeof(struct twist__conn *));
+    buckets = twist__malloc(size * sizeof(struct twist__conn *));
     if (buckets == NULL)
         return TWIST_ENOMEM;
 
@@ -267,7 +267,7 @@ static void migrate_buckets(struct twist__dict * dict, int num) {
 
     /* Once all bucket entries have been moved, drop the old hash table. */
     if (dict->split == 0) {
-        free(dict->tables[0].buckets);
+        twist__free(dict->tables[0].buckets);
         dict->tables[0] = dict->tables[1];
     }
 }

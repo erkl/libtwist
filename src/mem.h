@@ -22,9 +22,9 @@
 
 /* This would be where to replace the default memory management functions,
  * if one were so inclined. */
-#define malloc   malloc
-#define realloc  realloc
-#define free     free
+#define twist__malloc   malloc
+#define twist__realloc  realloc
+#define twist__free     free
 
 
 #endif

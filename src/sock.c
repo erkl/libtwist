@@ -46,7 +46,7 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     int ret;
 
     /* Allocate the socket struct itself. */
-    sock = malloc(sizeof(*sock));
+    sock = twist__malloc(sizeof(*sock));
     if (sock == NULL) {
         ret = TWIST_ENOMEM;
         goto err0;
@@ -107,7 +107,7 @@ err2:
     twist__pool_clear(&sock->pool);
     twist__prng_clear(&sock->prng);
 err1:
-    free(sock);
+    twist__free(sock);
 err0:
     *sockptr = NULL;
     return ret;
@@ -134,7 +134,7 @@ int twist__sock_destroy(struct twist__sock ** sockptr) {
     twist__prng_clear(&sock->prng);
 
     /* Free the socket and clear `sockptr`. */
-    free(sock);
+    twist__free(sock);
     *sockptr = NULL;
 
     return TWIST_OK;
