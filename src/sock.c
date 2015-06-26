@@ -12,12 +12,23 @@
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE. */
 
+#include "src/endian.h"
 #include "src/mem.h"
 #include "src/sock.h"
 
 
 /* Static functions. */
 static int64_t tick(struct twist__sock * sock, int64_t now);
+static int64_t receive(struct twist__sock * sock,
+                       const struct sockaddr * addr, socklen_t addrlen,
+                       const uint8_t * payload, size_t len, int64_t now);
+
+static int64_t receive_token_request(struct twist__sock * sock,
+                                     const struct sockaddr * addr, socklen_t addrlen,
+                                     const uint8_t * payload, size_t len, int64_t now);
+static int64_t receive_client_handshake(struct twist__sock * sock,
+                                        const struct sockaddr * addr, socklen_t addrlen,
+                                        const uint8_t * payload, size_t len, int64_t now);
 
 
 /* Allocate and initialize a new socket. */
@@ -137,6 +148,28 @@ int64_t twist__sock_tick(struct twist__sock * sock, int64_t now) {
 }
 
 
+/* Feed an incoming packet to the socket. */
+int64_t twist__sock_receive(struct twist__sock * sock,
+                            const struct sockaddr * addr, socklen_t addrlen,
+                            const uint8_t * payload, size_t len, int64_t now) {
+    int64_t ret;
+
+    /* Trigger all pending connection timers first. Only if that operation
+     * succeeds do we actually process the packet. */
+    ret = tick(sock, now);
+    if (ret >= 0)
+        ret = receive(sock, addr, addrlen, payload, len, now);
+
+    /* Cull excess objects from the object pool.
+     *
+     * TODO: Give the user an opportunity to specify how many objects to keep
+     *       in the pool. Eight feels like a reasonable number for now. */
+    twist__pool_cull(&sock->pool, 8);
+
+    return ret;
+}
+
+
 /* Feed a clock tick to the socket (inner). */
 static int64_t tick(struct twist__sock * sock, int64_t now) {
     struct twist__conn * conn;
@@ -181,5 +214,112 @@ static int64_t tick(struct twist__sock * sock, int64_t now) {
     sock->last_tick = now;
 
 discard:
+    return sock->next_tick;
+}
+
+
+/* Feed an incoming packet to the socket (inner). */
+static int64_t receive(struct twist__sock * sock,
+                       const struct sockaddr * addr, socklen_t addrlen,
+                       const uint8_t * payload, size_t len, int64_t now) {
+    struct twist__conn * conn;
+    struct twist__packet * pkt;
+    uint64_t cookie;
+    int64_t ret;
+    char type;
+
+    /* Discard clearly invalid packets immediately. */
+    if (len < 16)
+        goto discard;
+
+    /* Decode the destination connection cookie. */
+    cookie = be64dec(payload);
+    type = '\x00';
+
+    /* Zero cookies are used to indicate control packets, which need to be
+     * handled differently than ordinary data packets. */
+    if (cookie == 0) {
+        /* Validate the version. */
+        if (memcmp(payload + 7, "twist:0", 7) != 0)
+            goto discard;
+
+        /* The packet type is indicated by an ASCII-encoded character 15 bytes
+         * into the packet payload. */
+        type = (char) payload[15];
+
+        switch (type) {
+        /* Issue tokens in response to token requests. */
+        case 'q':
+            return receive_token_request(sock, addr, addrlen, payload, len, now);
+
+        /* Client handshakes are handled by the socket itself, while server
+         * and rendezvous handshakes should be forwarded to the relevant
+         * connection. */
+        case 'h':
+            cookie = be64dec(payload + 16);
+            if (cookie == 0)
+                return receive_client_handshake(sock, addr, addrlen, payload, len, now);
+            break;
+
+        /* All other valid packet types (i.e. token response packets) are
+         * handled by the receiving connection. */
+        case 't':
+            cookie = be64dec(payload + 16);
+            break;
+
+        /* Invalid packets are simply discarded. */
+        default:
+            goto discard;
+        }
+    }
+
+    /* Find the connection with this local cookie. If there is none,
+     * we discard the packet. */
+    conn = twist__dict_find(&sock->dict, cookie);
+    if (conn == NULL)
+        goto discard;
+
+    /* Construct a proper packet object and pass it on to the receiving
+     * connection's handle. */
+    pkt = twist__pool_alloc(&sock->pool);
+    if (pkt == NULL)
+        return TWIST_ENOMEM;
+
+    twist__packet_init(pkt, addr, addrlen, payload, len);
+
+    ret = twist__conn_receive(conn, pkt, type, now);
+    if (ret < 0)
+        return ret;
+
+    /* Make sure the connection's `next_tick` value is up to date, and that
+     * the socket's connection heap is still ordered. */
+    if (ret != conn->next_tick) {
+        conn->next_tick = ret;
+        twist__heap_fix(&sock->heap, conn);
+
+        /* Blindly dereferencing the pointer returned by `twist__heap_peek`
+         * is fine because it can't possibly be NULL. */
+        sock->next_tick = twist__heap_peek(&sock->heap)->next_tick;
+    }
+
+discard:
+    return sock->next_tick;
+}
+
+
+/* Respond to a token request packet. */
+static int64_t receive_token_request(struct twist__sock * sock,
+                                     const struct sockaddr * addr, socklen_t addrlen,
+                                     const uint8_t * payload, size_t len, int64_t now) {
+    /* TODO: Everything. */
+    return sock->next_tick;
+}
+
+
+/* Respond to a client handshake packet. */
+static int64_t receive_client_handshake(struct twist__sock * sock,
+                                        const struct sockaddr * addr, socklen_t addrlen,
+                                        const uint8_t * payload, size_t len, int64_t now) {
+    /* TODO: Everything. */
     return sock->next_tick;
 }
