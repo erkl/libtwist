@@ -90,6 +90,7 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     /* Set all other internal fields. */
     sock->last_tick = 0;
     sock->next_tick = 0;
+    sock->lingering = NULL;
 
     /* Finally, update `sockptr` and exit. */
     *sockptr = sock;
@@ -187,8 +188,17 @@ int64_t twist__sock_receive(struct twist__sock * sock,
 
 /* Feed a clock tick to the socket (inner). */
 static int64_t tick(struct twist__sock * sock, int64_t now) {
+    struct twist__packet * pkt;
     struct twist__conn * conn;
     int64_t ret;
+
+    /* Free any packets sent in the previous socket function call. */
+    while (sock->lingering != NULL) {
+        pkt = sock->lingering;
+        sock->lingering = pkt->next;
+
+        twist__pool_free(&sock->pool, pkt);
+    }
 
     /* Exit early if this tick occurred before the next timer is set to expire,
      * or if there simply aren't any pending timers. */

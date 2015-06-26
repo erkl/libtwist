@@ -34,6 +34,11 @@ struct twist__sock {
      * state. Essentially a shortcut for `twist__heap_peek(heap)->next_tick`. */
     int64_t next_tick;
 
+    /* Singly-linked list of packets that need to be kept around for a bit
+     * because of our guarantee that everything passed to a `send_packet`
+     * function will be valid until the next operation on the socket. */
+    struct twist__packet * lingering;
+
     /* Key used for encrypting and signing source address tokens. */
     uint8_t token_key[32];
 
