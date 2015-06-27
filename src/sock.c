@@ -376,7 +376,7 @@ static int generate_token(struct twist__sock * sock, uint8_t dst[64],
     /* Sign the token. */
     nectar_hmac_sha512_init(&hmac, sock->token_key, 32);
     nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, (size_t) addrlen);
-    nectar_hmac_sha512_update(&hmac, dst, 32);
+    nectar_hmac_sha512_update(&hmac, (const uint8_t *) dst, 32);
     nectar_hmac_sha512_final(&hmac, dst + 32, 32);
 
     return TWIST_OK;
@@ -393,8 +393,8 @@ static int validate_token(struct twist__sock * sock, uint8_t src[64],
 
     /* Calculate the expected HMAC-SHA512 digest. */
     nectar_hmac_sha512_init(&hmac, sock->token_key, 32);
-    nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, addrlen);
-    nectar_hmac_sha512_update(&hmac, src, 32);
+    nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, (size_t) addrlen);
+    nectar_hmac_sha512_update(&hmac, (const uint8_t *) src, 32);
     nectar_hmac_sha512_final(&hmac, digest, 32);
 
     /* Validate the digest. The constant-time comparison here isn't strictly
