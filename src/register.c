@@ -162,8 +162,8 @@ done:
  * token has expired or has already been claimed; otherwise TWIST_OK. */
 int twist__register_claim(struct twist__register * reg, const uint32_t token[2], int64_t now) {
     uint32_t upper, lower;
-    uint32_t bucket, index;
     uint32_t offset, bit;
+    uint32_t bucket, index;
 
     /* Pluck the token's components. */
     bucket = token[0];
