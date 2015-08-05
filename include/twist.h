@@ -51,11 +51,11 @@ int twist_destroy(struct twist_sock ** sockptr);
 
 
 /* TODO: Documentation. */
-int twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
-               const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+int64_t twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
+                   const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 /* TODO: Documentation. */
-int twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t now);
+int64_t twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t now);
 
 
 /* TODO: Documentation. */
@@ -68,7 +68,7 @@ ssize_t twist_write(struct twist_conn * conn, const uint8_t * buf, size_t len);
 int twist_flush(struct twist_conn * conn);
 
 /* TODO: Documentation. */
-int twist_close(struct twist_conn * conn);
+int twist_finish(struct twist_conn * conn);
 
 /* TODO: Documentation. */
 int twist_drop(struct twist_conn ** connptr);
