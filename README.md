@@ -1,6 +1,25 @@
-**libtwist** implements a transport layer network protocol providing reliable,
-ordered and private delivery of a stream of octets in each direction between
-two endpoints.
+**libtwist** is a portable implementation of the **twist** transport layer
+network protocol, which provides reliable, ordered and private delivery of
+octets in two directions. While **twist** connections are designed to be
+carried over UDP, the libtwist exposes platform independent state machines.
 
-While twist connections are designed to be carried over UDP, the library
-exposes platform and transport independent state machines.
+Very much a work in progress.
+
+
+#### License
+
+```
+Copyright (c) 2015, Erik Lundin.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+```
