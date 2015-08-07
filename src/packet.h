@@ -21,13 +21,6 @@
 #include "src/addr.h"
 
 
-/* Minimum and maximum packet sizes. The maximum size may seem arbitrary, but
- * it was calculated by subtracting the per-packet overhead of PPPoE (8 bytes),
- * IPv6 (40 bytes) and UDP (8 bytes) from Ethernet's MTU (1500 bytes). */
-#define MIN_PACKET_SIZE  28
-#define MAX_PACKET_SIZE  1444
-
-
 /* Describes an incoming or outgoing packet. */
 struct twist__packet {
     /* Source/destination address. */
