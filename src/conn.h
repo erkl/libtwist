@@ -57,6 +57,18 @@ int twist__conn_create(struct twist__conn ** connptr, struct twist__sock * sock,
 void twist__conn_destroy(struct twist__conn ** connptr);
 
 
+/* Begin the process of establishing a connection to a remote host with a
+ * newly created `twist__conn` struct. */
+int64_t twist__conn_dial(struct twist__conn * conn,
+                         const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+
+/* Begin the process of accepting an incoming connection request with a newly
+ * created `twist__conn` struct. */
+int64_t twist__conn_accept(struct twist__conn * conn,
+                           uint64_t remote_cookie, const uint8_t pk[64],
+                           const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+
+
 /* Propagate a time event to the connection's state machine. */
 int64_t twist__conn_tick(struct twist__conn * conn, int64_t now);
 
