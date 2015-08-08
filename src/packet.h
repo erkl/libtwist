@@ -21,6 +21,11 @@
 #include "src/addr.h"
 
 
+/* Control packet sizes. */
+#define HANDSHAKE_PACKET_SIZE  176
+#define TICKET_PACKET_SIZE     168
+
+
 /* Describes an incoming or outgoing packet. */
 struct twist__packet {
     /* Source/destination address. */
