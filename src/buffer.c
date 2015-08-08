@@ -117,7 +117,7 @@ ssize_t twist__buffer_write(struct twist__buffer * bufr, const uint8_t * buf, si
     /* And we're done. Finally. */
     bufr->size += len;
 
-    return len;
+    return (ssize_t) len;
 }
 
 
@@ -125,7 +125,7 @@ ssize_t twist__buffer_write(struct twist__buffer * bufr, const uint8_t * buf, si
  * buffer is empty. The `len` argument must not be greater than SSIZE_MAX. */
 ssize_t twist__buffer_read(struct twist__buffer * bufr, uint8_t * buf, size_t len) {
     struct twist__buffer_slab * slab;
-    ssize_t nread, n;
+    size_t n, nread;
 
     /* Initialize the counter. */
     nread = 0;
@@ -163,7 +163,7 @@ ssize_t twist__buffer_read(struct twist__buffer * bufr, uint8_t * buf, size_t le
         nread += n;
     }
 
-    return nread;
+    return (ssize_t) nread;
 }
 
 
