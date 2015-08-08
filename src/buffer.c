@@ -178,6 +178,9 @@ size_t twist__buffer_size(struct twist__buffer * bufr) {
 struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t cap) {
     struct twist__buffer_slab * head, * next;
 
+    /* Start with an empty list. */
+    head = NULL;
+
     /* Request one slab from the pool at a time. */
     for (;;) {
         next = twist__pool_alloc(bufr->pool);
