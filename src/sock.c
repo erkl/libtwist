@@ -261,8 +261,8 @@ static int64_t receive(struct twist__sock * sock,
     /* Zero cookies are used to indicate control packets, which need to be
      * handled differently than ordinary data packets. */
     if (cookie == 0) {
-        /* Validate the version. */
-        if (memcmp(payload + 7, "twist:0", 7) != 0)
+        /* Validate the version string. */
+        if (memcmp(payload + 7, "twist/0", 7) != 0)
             goto discard;
 
         /* The packet type is indicated by an ASCII-encoded character 15 bytes
