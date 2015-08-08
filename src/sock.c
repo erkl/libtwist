@@ -32,7 +32,7 @@ static int64_t receive_client_handshake(struct twist__sock * sock,
 
 static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
                            const struct sockaddr * addr, socklen_t addrlen, int64_t now);
-static int validate_ticket(struct twist__sock * sock, uint8_t src[64],
+static int validate_ticket(struct twist__sock * sock, const uint8_t src[64],
                            const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 
@@ -340,6 +340,7 @@ static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
     struct nectar_chacha20_ctx chacha;
     struct nectar_hmac_sha512_ctx hmac;
     uint8_t key[32];
+    uint32_t token[2];
     int ret;
 
     /* Grab a 192-bit initialization vector. */
@@ -348,9 +349,11 @@ static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
         return ret;
 
     /* Ask the strike register for a fresh token. */
-    ret = twist__register_reserve(&sock->reg, (uint32_t *) (dst + 24), now);
+    ret = twist__register_reserve(&sock->reg, token, now);
     if (ret != TWIST_OK)
         return ret;
+
+    memcpy(dst + 24, token, 8);
 
     /* Encrypt the token. */
     nectar_hchacha20(key, sock->ticket_key, dst);
@@ -368,17 +371,18 @@ static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
 
 
 /* Validate a handshake ticket. */
-static int validate_ticket(struct twist__sock * sock, uint8_t src[64],
+static int validate_ticket(struct twist__sock * sock, const uint8_t src[64],
                            const struct sockaddr * addr, socklen_t addrlen, int64_t now) {
     struct nectar_chacha20_ctx chacha;
     struct nectar_hmac_sha512_ctx hmac;
     uint8_t digest[32];
     uint8_t key[32];
+    uint32_t token[2];
 
     /* Calculate the expected HMAC-SHA512 digest. */
     nectar_hmac_sha512_init(&hmac, sock->ticket_key, 32);
     nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, (size_t) addrlen);
-    nectar_hmac_sha512_update(&hmac, (const uint8_t *) src, 32);
+    nectar_hmac_sha512_update(&hmac, src, 32);
     nectar_hmac_sha512_final(&hmac, digest, 32);
 
     /* Validate the digest. */
@@ -388,8 +392,8 @@ static int validate_ticket(struct twist__sock * sock, uint8_t src[64],
     /* Decrypt the 64-bit token. */
     nectar_hchacha20(key, sock->ticket_key, src);
     nectar_chacha20_init(&chacha, key, src + 16);
-    nectar_chacha20_xor(&chacha, src + 24, src + 24, 8);
+    nectar_chacha20_xor(&chacha, (uint8_t *) token, src + 24, 8);
 
     /* Claim the token. */
-    return twist__register_claim(&sock->reg, (uint32_t *) (src + 24), now);
+    return twist__register_claim(&sock->reg, token, now);
 }
