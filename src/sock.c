@@ -305,7 +305,7 @@ static int64_t receive(struct twist__sock * sock,
 
     twist__packet_init(pkt, addr, addrlen, payload, len);
 
-    ret = twist__conn_receive(conn, pkt, type, now);
+    ret = twist__conn_receive(conn, type, pkt, now);
     if (ret < 0)
         return ret;
 

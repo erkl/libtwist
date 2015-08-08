@@ -62,8 +62,8 @@ void twist__conn_destroy(struct twist__conn ** connptr);
 int64_t twist__conn_tick(struct twist__conn * conn, int64_t now);
 
 /* Feed a received packet to the connection's state machine. */
-int64_t twist__conn_receive(struct twist__conn * conn, struct twist__packet * packet,
-                            char type, int64_t now);
+int64_t twist__conn_receive(struct twist__conn * conn, char type,
+                            struct twist__packet * packet, int64_t now);
 
 
 #endif
