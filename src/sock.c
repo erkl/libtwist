@@ -26,9 +26,6 @@ static int64_t receive(struct twist__sock * sock,
                        const struct sockaddr * addr, socklen_t addrlen,
                        const uint8_t * payload, size_t len, int64_t now);
 
-static int64_t receive_token_request(struct twist__sock * sock,
-                                     const struct sockaddr * addr, socklen_t addrlen,
-                                     const uint8_t * payload, size_t len, int64_t now);
 static int64_t receive_client_handshake(struct twist__sock * sock,
                                         const struct sockaddr * addr, socklen_t addrlen,
                                         const uint8_t * payload, size_t len, int64_t now);
@@ -273,10 +270,6 @@ static int64_t receive(struct twist__sock * sock,
         type = (char) payload[15];
 
         switch (type) {
-        /* Issue tokens in response to token requests. */
-        case 'q':
-            return receive_token_request(sock, addr, addrlen, payload, len, now);
-
         /* Client handshakes are handled by the socket itself, while server
          * and rendezvous handshakes should be forwarded to the relevant
          * connection. */
@@ -328,15 +321,6 @@ static int64_t receive(struct twist__sock * sock,
     }
 
 discard:
-    return sock->next_tick;
-}
-
-
-/* Respond to a token request packet. */
-static int64_t receive_token_request(struct twist__sock * sock,
-                                     const struct sockaddr * addr, socklen_t addrlen,
-                                     const uint8_t * payload, size_t len, int64_t now) {
-    /* TODO: Everything. */
     return sock->next_tick;
 }
 
