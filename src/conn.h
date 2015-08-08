@@ -51,8 +51,7 @@ struct twist__conn {
 
 
 /* Allocate and initialize a connection struct. */
-int64_t twist__conn_create(struct twist__conn ** connptr, struct twist_sock * sock,
-                           uint64_t local_cookie);
+int twist__conn_create(struct twist__conn ** connptr, struct twist__sock * sock, uint64_t local_cookie);
 
 /* Free all memory owned by the connection struct. */
 void twist__conn_destroy(struct twist__conn ** connptr);
