@@ -102,12 +102,12 @@ int twist__prng_read(struct twist__prng * prng, uint8_t * buf, size_t len) {
 /* Seed a new keystream to use for random number generation. */
 static int seed(struct twist__prng * prng) {
     uint8_t buf[40];
-    size_t n;
+    int ret;
 
     /* Request a 40-byte seed. */
-    n = twist__env_entropy(prng->env, buf, 40);
-    if (n != 40)
-        return TWIST_EENTPY;
+    ret = twist__env_entropy(prng->env, buf, 40);
+    if (ret != TWIST_OK)
+        return ret;
 
     /* Set up the ChaCha20 context. */
     nectar_chacha20_init(&prng->cx, buf, buf + 32);

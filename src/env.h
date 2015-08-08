@@ -38,8 +38,9 @@ struct twist__env {
 
 
 /* Read `len` bytes of random data. */
-static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, size_t len) {
-    return env->read_entropy(buf, len, env->priv);
+static inline int twist__env_entropy(struct twist__env * env, uint8_t * buf, size_t len) {
+    size_t n = env->read_entropy(buf, len, env->priv);
+    return (n == len ? TWIST_OK : TWIST_EENTPY);
 }
 
 
@@ -47,7 +48,7 @@ static inline size_t twist__env_entropy(struct twist__env * env, uint8_t * buf, 
 static inline int twist__env_send(struct twist__env * env, const struct twist__packet * pkt) {
     int ret = env->send_packet((const struct sockaddr *) &pkt->addr, (socklen_t) pkt->addr.len,
                                pkt->payload, pkt->len, env->priv);
-    return (ret != 0 ? TWIST_ETRANS : 0);
+    return (ret == 0 ? TWIST_OK : TWIST_ETRANS);
 }
 
 
