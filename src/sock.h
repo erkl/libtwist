@@ -39,8 +39,8 @@ struct twist__sock {
      * function will be valid until the next operation on the socket. */
     struct twist__packet * lingering;
 
-    /* Key used for encrypting and signing source address tokens. */
-    uint8_t token_key[32];
+    /* Key used when encrypting and signing handshake tickets. */
+    uint8_t ticket_key[32];
 
     /* Connections ordered by their `next_tick` values. */
     struct twist__heap heap;
@@ -48,7 +48,7 @@ struct twist__sock {
     /* Hash table of connections keyed by their local cookies. */
     struct twist__dict dict;
 
-    /* Strike-register for source address tokens. */
+    /* Strike-register for handshake tickets. */
     struct twist__register reg;
 
     /* Shared memory pool. */
