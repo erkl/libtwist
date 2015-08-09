@@ -265,7 +265,7 @@ static int64_t receive(struct twist__sock * sock,
         if (memcmp(payload + 7, "twist/0", 7) != 0)
             goto discard;
 
-        /* The packet type is indicated by an ASCII-encoded character 15 bytes
+        /* The packet type is indicated by an ASCII character 15 bytes
          * into the packet payload. */
         type = (char) payload[15];
 
@@ -297,14 +297,14 @@ static int64_t receive(struct twist__sock * sock,
     if (conn == NULL)
         goto discard;
 
-    /* Construct a proper packet object and pass it on to the receiving
-     * connection's handle. */
+    /* Construct a proper packet object. */
     pkt = twist__pool_alloc(&sock->pool);
     if (pkt == NULL)
         return TWIST_ENOMEM;
 
     twist__packet_init(pkt, addr, addrlen, payload, len);
 
+    /* Pass the packet on to the receiving connection's handle. */
     ret = twist__conn_receive(conn, type, pkt, now);
     if (ret < 0)
         return ret;
