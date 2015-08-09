@@ -251,7 +251,7 @@ static int64_t receive(struct twist__sock * sock,
     char type;
 
     /* Discard clearly invalid packets immediately. */
-    if (len < 16)
+    if (len < 24)
         goto discard;
 
     /* Decode the destination connection cookie. */
