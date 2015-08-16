@@ -141,6 +141,51 @@ int twist__sock_destroy(struct twist__sock ** sockptr) {
 }
 
 
+/* Add a connection to the socket's internal data structures. */
+int twist__sock_add(struct twist__sock * sock, struct twist__conn * conn) {
+    int ret;
+
+    /* Add the connection to the socket's hash table and heap. The order we
+     * do this in is deliberate because, in the case of a failure, removing a
+     * connection from the dict is more costly than removing it from a heap. */
+    ret = twist__heap_add(&sock->heap, conn);
+    if (ret != TWIST_OK)
+        goto err0;
+
+    ret = twist__dict_add(&sock->dict, conn);
+    if (ret != TWIST_OK)
+        goto err1;
+
+    /* All done. */
+    return TWIST_OK;
+
+    /* Something went wrong. */
+err1:
+    twist__heap_remove(&sock->heap, conn);
+err0:
+    return ret;
+}
+
+
+/* Remove a connection from the socket's internal data structures. */
+void twist__sock_remove(struct twist__sock * sock, struct twist__conn * conn) {
+    twist__dict_remove(&sock->dict, conn);
+    twist__heap_remove(&sock->heap, conn);
+
+    /* If the connection is being stored in the socket's `accepted`
+     * list, unlink it. */
+    if (conn->next == conn) {
+        sock->accepted = NULL;
+    } else if (conn->next != NULL /* && conn->prev != NULL */) {
+        if (sock->accepted == conn)
+            sock->accepted = conn->next;
+
+        conn->prev->next = conn->next;
+        conn->next->prev = conn->prev;
+    }
+}
+
+
 /* Feed a clock tick to the socket. */
 int twist__sock_tick(struct twist__sock * sock, int64_t now) {
     struct twist__conn * conn;

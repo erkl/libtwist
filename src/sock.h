@@ -74,6 +74,13 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env);
 int twist__sock_destroy(struct twist__sock ** sockptr);
 
 
+/* Add a connection to the socket's internal data structures. */
+int twist__sock_add(struct twist__sock * sock, struct twist__conn * conn);
+
+/* Remove a connection from the socket's internal data structures. */
+void twist__sock_remove(struct twist__sock * sock, struct twist__conn * conn);
+
+
 /* Feed a clock tick to the socket. */
 int twist__sock_tick(struct twist__sock * sock, int64_t now);
 
