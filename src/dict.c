@@ -135,25 +135,14 @@ int twist__dict_add(struct twist__dict * dict, struct twist__conn * conn) {
 
 
 /* Remove a connection entry from the dict. */
-int twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn) {
+void twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn) {
     struct twist__dict_table * table;
     struct twist__conn ** prev;
     uint64_t cookie;
     uint32_t index;
-    int ret;
 
     /* Extract the cookie. */
     cookie = conn->local_cookie;
-
-    /* If we're resizing the underlying hash table, move some buckets.
-     * Otherwise, see if the underlying hash table needs resizing. */
-    if (dict->split > 0) {
-        migrate_buckets(dict, 4);
-    } else {
-        ret = maybe_resize(dict, -1);
-        if (ret != 0)
-            return ret;
-    }
 
     /* Find the head of the relevant hash bucket. */
     index = locate_bucket(dict, cookie, &table);
@@ -173,7 +162,15 @@ int twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn) {
         prev = &conn->chain;
     }
 
-    return TWIST_OK;
+    /* If we're resizing the underlying hash table, move some buckets.
+     * Otherwise, see if the underlying hash table needs resizing. */
+    if (dict->split > 0) {
+        migrate_buckets(dict, 4);
+    } else {
+        /* TODO: While calls to `twist__dict_remove` must always succeed, there
+         *       might be a better way to deal with this potential error? */
+        maybe_resize(dict, -1);
+    }
 }
 
 

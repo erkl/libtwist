@@ -73,7 +73,7 @@ struct twist__conn * twist__dict_find(struct twist__dict * dict, uint64_t cookie
 int twist__dict_add(struct twist__dict * dict, struct twist__conn * conn);
 
 /* Remove a connection entry from the dict. */
-int twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn);
+void twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn);
 
 
 #endif
