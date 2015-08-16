@@ -21,14 +21,14 @@
 
 
 /* Static functions. */
-static int64_t tick(struct twist__sock * sock, int64_t now);
-static int64_t receive(struct twist__sock * sock,
+static int handle_tick(struct twist__sock * sock, int64_t now);
+static int handle_recv(struct twist__sock * sock,
                        const struct sockaddr * addr, socklen_t addrlen,
                        const uint8_t * payload, size_t len, int64_t now);
 
-static int64_t receive_client_handshake(struct twist__sock * sock,
-                                        const struct sockaddr * addr, socklen_t addrlen,
-                                        const uint8_t * payload, size_t len, int64_t now);
+static int handle_connect(struct twist__sock * sock,
+                          const struct sockaddr * addr, socklen_t addrlen,
+                          const uint8_t * payload, size_t len, int64_t now);
 
 static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
                            const struct sockaddr * addr, socklen_t addrlen, int64_t now);
@@ -140,22 +140,28 @@ int twist__sock_destroy(struct twist__sock ** sockptr) {
 
 /* Feed a clock tick to the socket. */
 int twist__sock_tick(struct twist__sock * sock, int64_t now) {
+    struct twist__conn * conn;
     int ret;
-
-    /* Time travel is strictly forbidden. */
-    if (now < sock->last_tick)
-        return TWIST_EINVAL;
 
     /* Let the `tick` function do its job. It was separated out because while
      * the function for receiving packets also needs to process ticks, we don't
      * want to cull the object pool twice. */
-    ret = tick(sock, now);
+    ret = handle_tick(sock, now);
 
-    /* Cull excess objects from the object pool.
+    /* Cull excess objects from the object pool, regardless of whether the
+     * `handle_tick` call was successful.
      *
      * TODO: Give the user an opportunity to specify how many objects to keep
      *       in the pool. Eight feels like a reasonable number for now. */
     twist__pool_cull(&sock->pool, 8);
+
+    /* Update `sock->next_tick`. */
+    conn = twist__heap_peek(&sock->heap);
+    if (conn != NULL) {
+        sock->next_tick = conn->next_tick;
+    } else {
+        sock->next_tick = 0;
+    }
 
     return ret;
 }
@@ -165,29 +171,39 @@ int twist__sock_tick(struct twist__sock * sock, int64_t now) {
 int twist__sock_recv(struct twist__sock * sock,
                      const struct sockaddr * addr, socklen_t addrlen,
                      const uint8_t * payload, size_t len, int64_t now) {
-    int64_t ret;
+    struct twist__conn * conn;
+    int ret;
 
     /* Trigger all pending connection timers first. Only if that operation
      * succeeds do we actually process the packet. */
-    ret = tick(sock, now);
+    ret = handle_tick(sock, now);
     if (ret >= 0)
-        ret = receive(sock, addr, addrlen, payload, len, now);
+        ret = handle_recv(sock, addr, addrlen, payload, len, now);
 
-    /* Cull excess objects from the object pool.
+    /* Cull excess objects from the object pool, regardless of whether the
+     * `handle_tick` and `handle_recv` calls were successful.
      *
      * TODO: Give the user an opportunity to specify how many objects to keep
      *       in the pool. Eight feels like a reasonable number for now. */
     twist__pool_cull(&sock->pool, 8);
+
+    /* Update `sock->next_tick`. */
+    conn = twist__heap_peek(&sock->heap);
+    if (conn != NULL) {
+        sock->next_tick = conn->next_tick;
+    } else {
+        sock->next_tick = 0;
+    }
 
     return ret;
 }
 
 
 /* Feed a clock tick to the socket (inner). */
-static int64_t tick(struct twist__sock * sock, int64_t now) {
+static int handle_tick(struct twist__sock * sock, int64_t now) {
     struct twist__packet * pkt;
     struct twist__conn * conn;
-    int64_t ret;
+    int ret;
 
     /* Free any packets sent in the previous socket function call. */
     while (sock->lingering != NULL) {
@@ -196,6 +212,10 @@ static int64_t tick(struct twist__sock * sock, int64_t now) {
 
         twist__pool_free(&sock->pool, pkt);
     }
+
+    /* Time travel is strictly forbidden. */
+    if (now < sock->last_tick)
+        return TWIST_EINVAL;
 
     /* Exit early if this tick occurred before the next timer is set to expire,
      * or if there simply aren't any pending timers. */
@@ -221,34 +241,30 @@ static int64_t tick(struct twist__sock * sock, int64_t now) {
 
         /* Forward the tick to the next connection. */
         ret = twist__conn_tick(conn, now);
-        if (ret < 0)
+        if (ret != TWIST_OK)
             return ret;
 
-        /* Make sure the connection's `next_tick` value is up to date,
-         * and that the socket's connection heap is ordered. */
-        if (ret != conn->next_tick) {
-            conn->next_tick = ret;
-            twist__heap_fix(&sock->heap, conn);
-        }
+        /* Update `conn`'s position in the heap. */
+        twist__heap_fix(&sock->heap, conn);
     }
 
     /* Everything went fine - store this tick. */
     sock->last_tick = now;
 
 discard:
-    return sock->next_tick;
+    return TWIST_OK;
 }
 
 
 /* Feed an incoming packet to the socket (inner). */
-static int64_t receive(struct twist__sock * sock,
+static int handle_recv(struct twist__sock * sock,
                        const struct sockaddr * addr, socklen_t addrlen,
                        const uint8_t * payload, size_t len, int64_t now) {
     struct twist__conn * conn;
     struct twist__packet * pkt;
-    uint64_t cookie;
-    int64_t ret;
     char type;
+    uint64_t cookie;
+    int ret;
 
     /* Discard clearly invalid packets immediately. */
     if (len < 24)
@@ -274,7 +290,7 @@ static int64_t receive(struct twist__sock * sock,
          * and rendezvous handshakes should be forwarded to the relevant
          * connection. */
         if (type == 'h' && cookie == 0)
-            return receive_client_handshake(sock, addr, addrlen, payload, len, now);
+            return handle_connect(sock, addr, addrlen, payload, len, now);
 
         /* Discard invalid packets. All other control packets are handled by
          * the receiving connection, which means we fall through here. */
@@ -297,32 +313,24 @@ static int64_t receive(struct twist__sock * sock,
     twist__packet_init(pkt, addr, addrlen, payload, len);
 
     /* Pass the packet on to the receiving connection's handle. */
-    ret = twist__conn_receive(conn, type, pkt, now);
-    if (ret < 0)
+    ret = twist__conn_recv(conn, type, pkt, now);
+    if (ret != TWIST_OK)
         return ret;
 
-    /* Make sure the connection's `next_tick` value is up to date, and that
-     * the socket's connection heap is still ordered. */
-    if (ret != conn->next_tick) {
-        conn->next_tick = ret;
-        twist__heap_fix(&sock->heap, conn);
-
-        /* Blindly dereferencing the pointer returned by `twist__heap_peek`
-         * is fine because it can't possibly be NULL. */
-        sock->next_tick = twist__heap_peek(&sock->heap)->next_tick;
-    }
+    /* Update `conn`'s position in the heap. */
+    twist__heap_fix(&sock->heap, conn);
 
 discard:
-    return sock->next_tick;
+    return TWIST_OK;
 }
 
 
 /* Respond to a client handshake packet. */
-static int64_t receive_client_handshake(struct twist__sock * sock,
-                                        const struct sockaddr * addr, socklen_t addrlen,
-                                        const uint8_t * payload, size_t len, int64_t now) {
+static int handle_connect(struct twist__sock * sock,
+                          const struct sockaddr * addr, socklen_t addrlen,
+                          const uint8_t * payload, size_t len, int64_t now) {
     /* TODO: Everything. */
-    return sock->next_tick;
+    return TWIST_OK;
 }
 
 
