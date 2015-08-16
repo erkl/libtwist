@@ -20,6 +20,16 @@
 #include "src/sock.h"
 
 
+/* This static array helps generate Poly1305 MACs for control packets sent
+ * outside of the context of an established connection, which use null keys. */
+static const uint8_t zero[32] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+
 /* Static functions. */
 static int handle_tick(struct twist__sock * sock, int64_t now);
 static int handle_recv(struct twist__sock * sock,
@@ -385,8 +395,82 @@ discard:
 static int handle_connect(struct twist__sock * sock,
                           const struct sockaddr * addr, socklen_t addrlen,
                           const uint8_t * payload, size_t len, int64_t now) {
-    /* TODO: Everything. */
+    struct twist__conn * conn, * head;
+    uint64_t remote_cookie, local_cookie;
+    struct nectar_poly1305_ctx poly;
+    uint8_t mac[16];
+    int64_t tokid;
+    int ret;
+
+    /* Discard packets of the wrong size. */
+    if (len != HANDSHAKE_PACKET_SIZE)
+        goto discard;
+
+    /* Read the remote cookie (which mustn't be 0). */
+    remote_cookie = be64dec(payload + 24);
+    if (remote_cookie == 0)
+        goto discard;
+
+    /* Verify the Poly1305 "checksum". */
+    nectar_poly1305_init(&poly, zero);
+    nectar_poly1305_update(&poly, payload, 160);
+    nectar_poly1305_final(&poly, mac, 16);
+
+    if (nectar_bcmp(payload + 160, mac, 16) != 0)
+        goto discard;
+
+    /* Make sure that the attached handshake ticket is valid. */
+    tokid = check_ticket(sock, payload + 96, addr, addrlen, now);
+    if (tokid < 0) {
+        ret = (int) tokid;
+        goto err0;
+    }
+
+    /* Generate a local cookie for the connection. */
+    ret = generate_cookie(sock, &local_cookie);
+    if (ret != TWIST_OK)
+        goto err0;
+
+    /* Allocate and initialize a connection struct. */
+    ret = twist__conn_create(&conn, sock, local_cookie);
+    if (ret != TWIST_OK)
+        goto err0;
+
+    ret = twist__conn_accept(conn, remote_cookie, payload + 32, addr, addrlen, now);
+    if (ret != TWIST_OK)
+        goto err1;
+
+    /* Add the new connection to the socket's internal data structures. */
+    ret = twist__sock_add(sock, conn);
+    if (ret != TWIST_OK)
+        goto err1;
+
+    if ((head = sock->accepted) == NULL) {
+        conn->prev = conn;
+        conn->next = conn;
+    } else {
+        conn->next = head;
+        conn->prev = head->prev;
+        conn->prev->next = conn;
+        conn->next->prev = conn;
+    }
+
+    sock->accepted = conn;
+
+    /* We don't invalidate the ticket's token until we know every other
+     * operation was successful - otherwise it'd be impossible to retry calls
+     * to `twist__sock_recv` after a temporary failure. */
+    twist__register_claim(&sock->reg, tokid);
+
+    /* Don't complain when receiving invalid packets; just drop them. */
+discard:
     return TWIST_OK;
+
+    /* Something went wrong. */
+err1:
+    twist__conn_destroy(&conn);
+err0:
+    return ret;
 }
 
 
