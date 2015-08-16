@@ -109,6 +109,16 @@ int twist__dict_add(struct twist__dict * dict, struct twist__conn * conn) {
     uint32_t index;
     int ret;
 
+    /* If we're resizing the underlying hash table, move some buckets.
+     * Otherwise, see if the hash table needs resizing. */
+    if (dict->split > 0) {
+        migrate_buckets(dict, 4);
+    } else {
+        ret = maybe_resize(dict);
+        if (ret != TWIST_OK)
+            return ret;
+    }
+
     /* Find the relevant hash table bucket. */
     index = locate_bucket(dict, conn->local_cookie, &table);
 
@@ -119,16 +129,6 @@ int twist__dict_add(struct twist__dict * dict, struct twist__conn * conn) {
 
     /* Update the entry count. */
     dict->count++;
-
-    /* If we're resizing the underlying hash table, move some buckets.
-     * Otherwise, see if the underlying hash table needs resizing. */
-    if (dict->split > 0) {
-        migrate_buckets(dict, 4);
-    } else {
-        ret = maybe_resize(dict, 1);
-        if (ret != TWIST_OK)
-            return ret;
-    }
 
     return TWIST_OK;
 }
