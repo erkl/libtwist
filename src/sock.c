@@ -265,30 +265,21 @@ static int64_t receive(struct twist__sock * sock,
         if (memcmp(payload + 7, "twist/0", 7) != 0)
             goto discard;
 
-        /* The packet type is indicated by an ASCII character 15 bytes
-         * into the packet payload. */
+        /* The packet type is indicated by an ASCII character 15 bytes into
+         * the packet payload. */
         type = (char) payload[15];
+        cookie = be64dec(payload + 16);
 
-        switch (type) {
         /* Client handshakes are handled by the socket itself, while server
          * and rendezvous handshakes should be forwarded to the relevant
          * connection. */
-        case 'h':
-            cookie = be64dec(payload + 16);
-            if (cookie == 0)
-                return receive_client_handshake(sock, addr, addrlen, payload, len, now);
-            break;
+        if (type == 'h' && cookie == 0)
+            return receive_client_handshake(sock, addr, addrlen, payload, len, now);
 
-        /* All other valid packet types (i.e. ticket response packets) are
-         * handled by the receiving connection. */
-        case 't':
-            cookie = be64dec(payload + 16);
-            break;
-
-        /* Invalid packets are simply discarded. */
-        default:
+        /* Discard invalid packets. All other control packets are handled by
+         * the receiving connection, which means we fall through here. */
+        if (type != 'h' && type != 't')
             goto discard;
-        }
     }
 
     /* Find the connection with this local cookie. If there is none,
@@ -297,7 +288,8 @@ static int64_t receive(struct twist__sock * sock,
     if (conn == NULL)
         goto discard;
 
-    /* Construct a proper packet object. */
+    /* Construct a proper packet object that we can hand over to the
+     * connection state machine. */
     pkt = twist__pool_alloc(&sock->pool);
     if (pkt == NULL)
         return TWIST_ENOMEM;
