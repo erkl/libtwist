@@ -68,7 +68,6 @@ struct twist__sock {
 /* Allocate and initialize a new socket. */
 int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env);
 
-
 /* Free a socket. Fails with TWIST_EAGAIN if the socket in question has any
  * open (as in not yet dropped) connections. */
 int twist__sock_destroy(struct twist__sock ** sockptr);
