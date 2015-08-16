@@ -39,23 +39,23 @@ struct twist_conn;
 int twist_create(struct twist_sock ** sockptr);
 
 /* TODO: Documentation. */
-int64_t twist_tick(struct twist_sock * sock, int64_t now);
+int twist_tick(struct twist_sock * sock, int64_t now);
 
 /* TODO: Documentation. */
-int64_t twist_recv(struct twist_sock * sock,
-                   const struct sockaddr * addr, socklen_t addrlen,
-                   const uint8_t * buf, size_t len, int64_t now);
+int twist_recv(struct twist_sock * sock,
+               const struct sockaddr * addr, socklen_t addrlen,
+               const uint8_t * buf, size_t len, int64_t now);
 
 /* TODO: Documentation. */
 int twist_destroy(struct twist_sock ** sockptr);
 
 
 /* TODO: Documentation. */
-int64_t twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
-                   const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+int twist_dial(struct twist_sock * sock, struct twist_conn ** connptr,
+               const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 /* TODO: Documentation. */
-int64_t twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t now);
+int twist_accept(struct twist_sock * sock, struct twist_conn ** connptr, int64_t now);
 
 
 /* TODO: Documentation. */
