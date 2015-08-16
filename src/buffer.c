@@ -28,8 +28,8 @@
 
 
 /* Static functions. */
-struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t len);
-size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len);
+static struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t len);
+static size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len);
 
 
 /* Initialize the buffer's internal fields. */
@@ -175,7 +175,7 @@ size_t twist__buffer_size(struct twist__buffer * bufr) {
 
 /* Allocate enough slabs to fit `cap` bytes of data. Returns the first item of
  * a singly linked list of slabs on success, or NULL if an allocation failed. */
-struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t cap) {
+static struct twist__buffer_slab * alloc(struct twist__buffer * bufr, size_t cap) {
     struct twist__buffer_slab * head, * next;
 
     /* Start with an empty list. */
@@ -217,7 +217,7 @@ err:
 
 
 /* Append up to `len` bytes of data to a slab. */
-size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len) {
+static size_t append(struct twist__buffer_slab * slab, const uint8_t * buf, size_t len) {
     size_t n = UNUSED(slab);
     if (n > len)
         n = len;
