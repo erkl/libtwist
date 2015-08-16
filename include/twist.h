@@ -39,6 +39,10 @@ struct twist_conn;
 int twist_create(struct twist_sock ** sockptr);
 
 /* TODO: Documentation. */
+int twist_destroy(struct twist_sock ** sockptr);
+
+
+/* TODO: Documentation. */
 int twist_tick(struct twist_sock * sock, int64_t now);
 
 /* TODO: Documentation. */
@@ -47,7 +51,7 @@ int twist_recv(struct twist_sock * sock,
                const uint8_t * buf, size_t len, int64_t now);
 
 /* TODO: Documentation. */
-int twist_destroy(struct twist_sock ** sockptr);
+int64_t twist_next(struct twist_sock * sock);
 
 
 /* TODO: Documentation. */
