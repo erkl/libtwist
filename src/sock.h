@@ -39,14 +39,17 @@ struct twist__sock {
      * function will be valid until the next operation on the socket. */
     struct twist__packet * lingering;
 
-    /* Key used when encrypting and signing handshake tickets. */
-    uint8_t ticket_key[32];
-
     /* Connections ordered by their `next_tick` values. */
     struct twist__heap heap;
 
     /* Hash table of connections keyed by their local cookies. */
     struct twist__dict dict;
+
+    /* Circular linked list of accepted connections. */
+    struct twist__conn * accepted;
+
+    /* Key used when encrypting and signing handshake tickets. */
+    uint8_t ticket_key[32];
 
     /* Strike-register for handshake tickets. */
     struct twist__register reg;

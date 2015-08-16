@@ -36,6 +36,12 @@ struct twist__conn {
      * NOTE: Managed in conn.c, but used by sock.c and heap.c. */
     int64_t next_tick;
 
+    /* Intrusive pointers for storing the connection in its socket's linked
+     * list of pending accepted connections.
+     * NOTE: Managed in sock.c. */
+    struct twist__conn * prev;
+    struct twist__conn * next;
+
     /* Buffers for outgoing and incoming data. */
     struct twist__buffer write_buffer;
     struct twist__buffer read_buffer;

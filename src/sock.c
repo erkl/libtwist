@@ -90,6 +90,7 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
     sock->last_tick = 0;
     sock->next_tick = 0;
     sock->lingering = NULL;
+    sock->accepted = NULL;
 
     /* Finally, update `sockptr` and exit. */
     *sockptr = sock;
