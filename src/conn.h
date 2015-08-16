@@ -32,20 +32,20 @@ struct twist__conn {
     uint64_t local_cookie;
     uint64_t remote_cookie;
 
+    /* When is the next time-based event scheduled to occur?
+     * NOTE: Managed in conn.c, but used by sock.c and heap.c. */
+    int64_t next_tick;
+
     /* Buffers for outgoing and incoming data. */
     struct twist__buffer write_buffer;
     struct twist__buffer read_buffer;
 
-    /* When is the next time-based event scheduled to occur?
-     * NOTE: Managed by sock.c, used by heap.c. */
-    int64_t next_tick;
-
     /* Current position in the socket's min-heap.
-     * NOTE: Managed by heap.c. */
+     * NOTE: Managed in heap.c. */
     uint32_t heap_index;
 
     /* Intrusive pointer for hash table chaining.
-     * NOTE: Managed by dict.c. */
+     * NOTE: Managed in dict.c. */
     struct twist__conn * chain;
 };
 
