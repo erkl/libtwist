@@ -32,8 +32,8 @@ static int handle_connect(struct twist__sock * sock,
 
 static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
                            const struct sockaddr * addr, socklen_t addrlen, int64_t now);
-static int claim_ticket(struct twist__sock * sock, const uint8_t src[64],
-                        const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+static int64_t check_ticket(struct twist__sock * sock, const uint8_t src[64],
+                            const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
 
 /* Allocate and initialize a new socket. */
@@ -371,8 +371,8 @@ static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
 
 
 /* Validate a handshake ticket. */
-static int claim_ticket(struct twist__sock * sock, const uint8_t src[64],
-                        const struct sockaddr * addr, socklen_t addrlen, int64_t now) {
+static int64_t check_ticket(struct twist__sock * sock, const uint8_t src[64],
+                            const struct sockaddr * addr, socklen_t addrlen, int64_t now) {
     struct nectar_chacha20_ctx chacha;
     struct nectar_hmac_sha512_ctx hmac;
     uint8_t digest[32];
@@ -394,6 +394,6 @@ static int claim_ticket(struct twist__sock * sock, const uint8_t src[64],
     nectar_chacha20_init(&chacha, key, src + 16);
     nectar_chacha20_xor(&chacha, (uint8_t *) token, src + 24, 8);
 
-    /* Claim the token. */
-    return twist__register_claim(&sock->reg, token, now);
+    /* Finally, find the token's position in the bitset. */
+    return twist__register_check(&sock->reg, token, now);
 }
