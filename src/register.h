@@ -67,9 +67,15 @@ void twist__register_clear(struct twist__register * reg);
  * or 2^31 - 1); otherwise TWIST_OK. */
 int twist__register_reserve(struct twist__register * reg, uint32_t token[2], int64_t now);
 
-/* Claim a token, removing it from the register. Returns TWIST_EINVAL if the
- * token has expired or has already been claimed; otherwise TWIST_OK. */
-int twist__register_claim(struct twist__register * reg, const uint32_t token[2], int64_t now);
+/* Validate a token. Returns TWIST_EINVAL if the token has already expired
+ * or been claimed; otherwise a token id greater than or equal to 0. */
+int64_t twist__register_check(struct twist__register * reg, const uint32_t token[2], int64_t now);
+
+/* Claim a token using an id returned by `twist__register_check`. It is of
+ * utmost importance that no other operations are performed on the register
+ * in the mean time. */
+void twist__register_claim(struct twist__register * reg, int64_t tokid);
+
 
 /* Remove any expired tokens from the register, then shrink its internal storage
  * array if possible. Returns TWIST_ENOMEM if a necessary allocation failed,

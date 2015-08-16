@@ -158,9 +158,9 @@ done:
 }
 
 
-/* Claim a token, removing it from the register. Returns TWIST_EINVAL if the
- * token has expired or has already been claimed; otherwise TWIST_OK. */
-int twist__register_claim(struct twist__register * reg, const uint32_t token[2], int64_t now) {
+/* Validate a token. Returns TWIST_EINVAL if the token has already expired
+ * or been claimed; otherwise a token id greater than or equal to 0. */
+int64_t twist__register_check(struct twist__register * reg, const uint32_t token[2], int64_t now) {
     uint32_t upper, lower;
     uint32_t offset, bit;
     uint32_t bucket, index;
@@ -181,13 +181,19 @@ int twist__register_claim(struct twist__register * reg, const uint32_t token[2],
     offset = (reg->offsets[bucket % reg->lifetime] + (index / 32)) & reg->mask;
     bit = 1 << (index & 31);
 
-    if ((reg->bits[offset] & bit))
+    if (reg->bits[offset] & bit)
         return TWIST_EINVAL;
 
-    /* Mark this token as claimed. */
-    reg->bits[offset] |= bit;
+    /* Encode the token bit's position in 37 bits. */
+    return (((int64_t) offset) << 5) | (int64_t) (index & 31);
+}
 
-    return TWIST_OK;
+
+/* Claim a token using an id returned by `twist__register_check`. It is of
+ * utmost importance that no other operations are performed on the register
+ * in the mean time. */
+void twist__register_claim(struct twist__register * reg, int64_t tokid) {
+    reg->bits[tokid >> 5] |= (1 << (tokid & 31));
 }
 
 
