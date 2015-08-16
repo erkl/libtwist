@@ -26,7 +26,7 @@
 
 
 /* Static functions. */
-static int maybe_resize(struct twist__dict * dict, int delta);
+static int maybe_resize(struct twist__dict * dict);
 static void migrate_bucket(struct twist__dict * dict, uint32_t index);
 static void migrate_buckets(struct twist__dict * dict, int num);
 static uint32_t locate_bucket(struct twist__dict * dict, uint64_t cookie,
@@ -169,14 +169,14 @@ void twist__dict_remove(struct twist__dict * dict, struct twist__conn * conn) {
     } else {
         /* TODO: While calls to `twist__dict_remove` must always succeed, there
          *       might be a better way to deal with this potential error? */
-        maybe_resize(dict, -1);
+        maybe_resize(dict);
     }
 }
 
 
 /* Shrink or grow the dict's underlying hash table if utilization is too high
  * or too low. */
-static int maybe_resize(struct twist__dict * dict, int delta) {
+static int maybe_resize(struct twist__dict * dict) {
     struct twist__conn ** buckets;
     uint64_t count;
     uint32_t size;
@@ -186,11 +186,12 @@ static int maybe_resize(struct twist__dict * dict, int delta) {
     count = dict->count;
     size = dict->tables[0].size;
 
-    /* Resize the hash table if it now contains as many entries as there are
-     * buckets, or if at least 75% of the buckets are empty. */
-    if (delta > 0 && size < MAX_TABLE_SIZE && count >= (uint64_t) size)
+    /* Resize the hash table if it contains as many entries as there are hash
+     * buckets, or if there are more than four times as many hash buckets as
+     * there are actual entries. */
+    if (count >= (uint64_t) size && size < MAX_TABLE_SIZE)
         size <<= 1;
-    else if (delta < 0 && size > MIN_TABLE_SIZE && count <= (uint64_t) (size / 4))
+    else if (count < (uint64_t) (size / 4) && size > MIN_TABLE_SIZE)
         size >>= 1;
     else
         return TWIST_OK;
