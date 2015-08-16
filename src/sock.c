@@ -519,13 +519,12 @@ static int64_t check_ticket(struct twist__sock * sock, const uint8_t src[64],
     uint8_t key[32];
     uint32_t token[2];
 
-    /* Calculate the expected HMAC-SHA512 digest. */
+    /* Validate the HMAC-SHA512 digest. */
     nectar_hmac_sha512_init(&hmac, sock->ticket_key, 32);
     nectar_hmac_sha512_update(&hmac, (const uint8_t *) addr, (size_t) addrlen);
     nectar_hmac_sha512_update(&hmac, src, 32);
     nectar_hmac_sha512_final(&hmac, digest, 32);
 
-    /* Validate the digest. */
     if (nectar_bcmp(src + 32, digest, 32) != 0)
         return TWIST_EINVAL;
 
