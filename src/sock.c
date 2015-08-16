@@ -139,8 +139,8 @@ int twist__sock_destroy(struct twist__sock ** sockptr) {
 
 
 /* Feed a clock tick to the socket. */
-int64_t twist__sock_tick(struct twist__sock * sock, int64_t now) {
-    int64_t ret;
+int twist__sock_tick(struct twist__sock * sock, int64_t now) {
+    int ret;
 
     /* Time travel is strictly forbidden. */
     if (now < sock->last_tick)
@@ -162,9 +162,9 @@ int64_t twist__sock_tick(struct twist__sock * sock, int64_t now) {
 
 
 /* Feed an incoming packet to the socket. */
-int64_t twist__sock_receive(struct twist__sock * sock,
-                            const struct sockaddr * addr, socklen_t addrlen,
-                            const uint8_t * payload, size_t len, int64_t now) {
+int twist__sock_recv(struct twist__sock * sock,
+                     const struct sockaddr * addr, socklen_t addrlen,
+                     const uint8_t * payload, size_t len, int64_t now) {
     int64_t ret;
 
     /* Trigger all pending connection timers first. Only if that operation
