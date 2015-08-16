@@ -118,13 +118,21 @@ err0:
  * open (as in not yet dropped) connections. */
 int twist__sock_destroy(struct twist__sock ** sockptr) {
     struct twist__sock * sock;
+    struct twist__conn * conn;
 
     /* Dereference the pointer. */
     sock = *sockptr;
 
-    /* Abort if there are any non-dropped connections. */
+    /* Abort if there still are open connections. */
     if (twist__heap_peek(&sock->heap) != NULL)
         return TWIST_EAGAIN;
+
+    /* Drop any connections that have been accepted by the socket, but not
+     * yet handed over to the user. */
+    while ((conn = sock->accepted) != NULL) {
+        twist__sock_remove(sock, conn);
+        twist__conn_destroy(&conn);
+    }
 
     /* Tear down all internal structs. */
     twist__heap_clear(&sock->heap);
