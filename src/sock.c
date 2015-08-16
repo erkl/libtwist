@@ -35,6 +35,8 @@ static int generate_ticket(struct twist__sock * sock, uint8_t dst[64],
 static int64_t check_ticket(struct twist__sock * sock, const uint8_t src[64],
                             const struct sockaddr * addr, socklen_t addrlen, int64_t now);
 
+static int generate_cookie(struct twist__sock * sock, uint64_t * cookie);
+
 
 /* Allocate and initialize a new socket. */
 int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
@@ -396,4 +398,22 @@ static int64_t check_ticket(struct twist__sock * sock, const uint8_t src[64],
 
     /* Finally, find the token's position in the bitset. */
     return twist__register_check(&sock->reg, token, now);
+}
+
+
+/* Generate a random connection cookie. */
+static int generate_cookie(struct twist__sock * sock, uint64_t * dst) {
+    uint64_t cookie;
+    int ret;
+
+    /* Keep generating random cookies until we end up with one that is
+     * both a) valid and b) available. */
+    do {
+        ret = twist__prng_read(&sock->prng, (uint8_t *) &cookie, sizeof(cookie));
+        if (ret != TWIST_OK)
+            return ret;
+    } while (cookie == 0 || twist__dict_find(&sock->dict, cookie) != NULL);
+
+    *dst = cookie;
+    return TWIST_OK;
 }
