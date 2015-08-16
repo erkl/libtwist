@@ -47,7 +47,7 @@ struct twist__conn * twist__heap_peek(struct twist__heap * heap);
 int twist__heap_add(struct twist__heap * heap, struct twist__conn * conn);
 
 /* Remove a connection from the heap. */
-int twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn);
+void twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn);
 
 
 /* Re-establish heap ordering after a particular connection's `next_tick`

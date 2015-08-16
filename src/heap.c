@@ -92,16 +92,8 @@ int twist__heap_add(struct twist__heap * heap, struct twist__conn * conn) {
 
 
 /* Remove a connection from the heap. */
-int twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn) {
+void twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn) {
     uint32_t index;
-    int ret;
-
-    /* If 25% or less of the underlying array is in use, shrink it. */
-    if ((heap->count - 1) <= (heap->size / 4) && heap->count > MIN_HEAP_SIZE) {
-        ret = resize(heap, heap->size / 2);
-        if (ret != TWIST_OK)
-            return ret;
-    }
 
     /* Swap the connection we're removing with the heap's last entry, then
      * decrement the entry count. */
@@ -112,7 +104,13 @@ int twist__heap_remove(struct twist__heap * heap, struct twist__conn * conn) {
     /* Restore heap ordering. */
     down(heap, index);
 
-    return TWIST_OK;
+    /* If less than 25% of the underlying storage is in use, replace it
+     * with a smaller array. */
+    if (heap->count < (heap->size/4) && heap->size > MIN_HEAP_SIZE) {
+        /* TODO: While calls to `twist__heap_remove` must always succeed, there
+         *       might be a better way to deal with this potential error? */
+        resize(heap, heap->size / 2);
+    }
 }
 
 
