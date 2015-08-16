@@ -68,7 +68,7 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
         goto err2;
 
     /* Initialize the connection hash map. */
-    ret = twist__env_entropy(&sock->env, seed, sizeof(seed));
+    ret = twist__prng_read(&sock->prng, seed, sizeof(seed));
     if (ret != TWIST_OK)
         goto err3;
 
@@ -82,7 +82,7 @@ int twist__sock_create(struct twist__sock ** sockptr, struct twist__env * env) {
         goto err4;
 
     /* Generate the handshake ticket key. */
-    ret = twist__env_entropy(&sock->env, sock->ticket_key, 32);
+    ret = twist__prng_read(&sock->prng, sock->ticket_key, 32);
     if (ret != TWIST_OK)
         goto err5;
 
