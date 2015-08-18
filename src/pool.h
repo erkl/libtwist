@@ -50,8 +50,8 @@ void * twist__pool_alloc(struct twist__pool * pool);
  * the object will be freed. */
 void twist__pool_free(struct twist__pool * pool, void * obj);
 
-/* Free all but `keep` objects from the pool. If there are already fewer than
- * `keep + 1` objects in the pool the function call does nothing. */
+/* Free all but `keep` objects from the pool. If there are already at most
+ * `keep` objects in the pool the function call does nothing. */
 void twist__pool_cull(struct twist__pool * pool, unsigned int keep);
 
 

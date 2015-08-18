@@ -28,19 +28,13 @@ struct twist__conn {
     /* Connection state. */
     int state;
 
-    /* Local and remote connection cookies. */
-    uint64_t local_cookie;
-    uint64_t remote_cookie;
-
     /* When is the next time-based event scheduled to occur?
      * NOTE: Managed in conn.c, but used by sock.c and heap.c. */
     int64_t next_tick;
 
-    /* Intrusive pointers for storing the connection in its socket's linked
-     * list of pending accepted connections.
-     * NOTE: Managed in sock.c. */
-    struct twist__conn * prev;
-    struct twist__conn * next;
+    /* Local and remote connection cookies. */
+    uint64_t local_cookie;
+    uint64_t remote_cookie;
 
     /* Buffers for outgoing and incoming data. */
     struct twist__buffer write_buffer;
@@ -53,6 +47,12 @@ struct twist__conn {
     /* Intrusive pointer for hash table chaining.
      * NOTE: Managed in dict.c. */
     struct twist__conn * chain;
+
+    /* Intrusive pointers for storing the connection in its socket's linked
+     * list of pending accepted connections.
+     * NOTE: Managed in sock.c. */
+    struct twist__conn * prev;
+    struct twist__conn * next;
 };
 
 
@@ -65,8 +65,8 @@ void twist__conn_destroy(struct twist__conn ** connptr);
 
 /* Begin the process of establishing a connection to a remote host with a
  * newly created `twist__conn` struct. */
-int twist__conn_dial(struct twist__conn * conn,
-                         const struct sockaddr * addr, socklen_t addrlen, int64_t now);
+int twist__conn_dial(struct twist__conn * conn, const struct sockaddr * addr,
+                     socklen_t addrlen, int64_t now);
 
 /* Begin the process of accepting an incoming connection request with a newly
  * created `twist__conn` struct. */
